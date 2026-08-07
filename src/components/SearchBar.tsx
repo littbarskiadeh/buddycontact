@@ -7,7 +7,7 @@ import type { Tag } from "@/types";
 const SEARCH_DEBOUNCE_MS = 300;
 
 const controlClassName =
-  "rounded-md border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:border-slate-700 dark:bg-slate-900";
+  "rounded-full border border-stone-300 bg-surface px-4 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700";
 
 export function SearchBar({ tags }: { tags: Tag[] }) {
   const router = useRouter();
@@ -77,7 +77,7 @@ export function SearchBar({ tags }: { tags: Tag[] }) {
         ))}
       </select>
 
-      <span aria-live="polite" className="text-xs text-slate-400">
+      <span aria-live="polite" className="text-xs text-stone-400">
         {isPending ? "Searching…" : ""}
       </span>
     </div>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { deleteContact, logInteraction, toggleFavorite } from "@/app/actions";
 import { ContactForm } from "@/components/ContactForm";
-import { FollowUpBadge } from "@/components/FollowUpBadge";
+import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { formatRelativeTime, getFollowUpInfo } from "@/lib/followup";
 import type { Contact } from "@/types";
 
@@ -18,16 +18,19 @@ function initials(name: string): string {
 }
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 rounded";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950 rounded";
+
+const pillButton = `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${focusRing}`;
 
 export function ContactCard({ contact }: { contact: Contact }) {
   const [isEditing, setIsEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [justLogged, setJustLogged] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   if (isEditing) {
     return (
-      <li className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+      <li className="rounded-2xl border border-stone-200 bg-surface p-5 shadow-sm dark:border-stone-800">
         <ContactForm contact={contact} onDone={() => setIsEditing(false)} />
       </li>
     );
@@ -40,138 +43,145 @@ export function ContactCard({ contact }: { contact: Contact }) {
       : null,
     createdAt: new Date(contact.createdAt),
   });
+  const style = FOLLOWUP_STYLES[followUp.status];
 
   const lastContactedLabel = contact.lastContactedAt
     ? `Contacted ${formatRelativeTime(new Date(contact.lastContactedAt))}`
     : "Never contacted";
 
   return (
-    <li className="flex items-start gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white dark:bg-white dark:text-slate-900">
-        {initials(contact.name) || "?"}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/contacts/${contact.id}`}
-            className={`truncate font-semibold text-slate-900 hover:underline dark:text-slate-100 ${focusRing}`}
-          >
-            {contact.name}
-          </Link>
-          {contact.favorite && (
-            <span role="img" aria-label="Favorite">
-              ⭐
-            </span>
-          )}
-          <FollowUpBadge status={followUp.status} />
+    <li className="group animate-fade-in-up rounded-2xl border border-stone-200 bg-surface p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-stone-800">
+      <div className="flex items-start gap-4">
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-semibold ring-2 ring-offset-2 dark:ring-offset-stone-950 ${style.badge} ${style.ring}`}
+        >
+          {initials(contact.name) || "?"}
         </div>
 
-        <dl className="mt-1 space-y-0.5 text-sm text-slate-600 dark:text-slate-400">
-          {contact.company && (
-            <div className="flex gap-1">
-              <dt className="sr-only">Company</dt>
-              <dd className="truncate">{contact.company}</dd>
-            </div>
-          )}
-          {contact.email && (
-            <div className="flex gap-1">
-              <dt className="sr-only">Email</dt>
-              <dd className="truncate">{contact.email}</dd>
-            </div>
-          )}
-          {contact.phone && (
-            <div className="flex gap-1">
-              <dt className="sr-only">Phone</dt>
-              <dd className="truncate">{contact.phone}</dd>
-            </div>
-          )}
-        </dl>
-
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          {lastContactedLabel}
-          {contact.cadenceDays ? ` · every ${contact.cadenceDays} days` : ""}
-        </p>
-
-        {contact.tags.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-1.5">
-            {contact.tags.map((tag) => (
-              <li
-                key={tag.id}
-                className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              >
-                {tag.name}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() =>
-              startTransition(async () => {
-                await logInteraction(contact.id);
-              })
-            }
-            className={`font-medium text-slate-900 hover:underline disabled:opacity-50 dark:text-slate-100 ${focusRing}`}
-          >
-            Log Contact
-          </button>
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() =>
-              startTransition(async () => {
-                await toggleFavorite(contact.id, !contact.favorite);
-              })
-            }
-            className={`text-slate-500 hover:text-slate-800 disabled:opacity-50 dark:text-slate-400 dark:hover:text-slate-200 ${focusRing}`}
-          >
-            {contact.favorite ? "Unfavorite" : "Favorite"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className={`text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 ${focusRing}`}
-          >
-            Edit
-          </button>
-          {confirmingDelete ? (
-            <span className="flex items-center gap-2">
-              <span className="text-slate-500 dark:text-slate-400">
-                Delete {contact.name}?
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/contacts/${contact.id}`}
+              className={`truncate font-display text-lg font-semibold text-foreground hover:underline ${focusRing}`}
+            >
+              {contact.name}
+            </Link>
+            {contact.favorite && (
+              <span role="img" aria-label="Favorite">
+                ⭐
               </span>
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={() =>
-                  startTransition(async () => {
-                    await deleteContact(contact.id);
-                  })
-                }
-                className={`font-medium text-red-600 hover:underline disabled:opacity-50 dark:text-red-400 ${focusRing}`}
-              >
-                Confirm
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmingDelete(false)}
-                className={`text-slate-500 hover:underline dark:text-slate-400 ${focusRing}`}
-              >
-                Cancel
-              </button>
-            </span>
-          ) : (
+            )}
+            <FollowUpBadge status={followUp.status} />
+          </div>
+
+          <dl className="mt-1 space-y-0.5 text-sm text-stone-600 dark:text-stone-400">
+            {contact.company && (
+              <div className="flex gap-1">
+                <dt className="sr-only">Company</dt>
+                <dd className="truncate">{contact.company}</dd>
+              </div>
+            )}
+            {contact.email && (
+              <div className="flex gap-1">
+                <dt className="sr-only">Email</dt>
+                <dd className="truncate">{contact.email}</dd>
+              </div>
+            )}
+            {contact.phone && (
+              <div className="flex gap-1">
+                <dt className="sr-only">Phone</dt>
+                <dd className="truncate">{contact.phone}</dd>
+              </div>
+            )}
+          </dl>
+
+          <p className="mt-1 text-xs text-stone-500 dark:text-stone-500">
+            {lastContactedLabel}
+            {contact.cadenceDays ? ` · every ${contact.cadenceDays} days` : ""}
+          </p>
+
+          {contact.tags.length > 0 && (
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {contact.tags.map((tag) => (
+                <li
+                  key={tag.id}
+                  className="rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                >
+                  {tag.name}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
             <button
               type="button"
-              onClick={() => setConfirmingDelete(true)}
-              className={`text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ${focusRing}`}
+              disabled={isPending}
+              onClick={() =>
+                startTransition(async () => {
+                  await logInteraction(contact.id);
+                  setJustLogged(true);
+                  setTimeout(() => setJustLogged(false), 350);
+                })
+              }
+              className={`${pillButton} bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 ${justLogged ? "animate-pulse-once" : ""}`}
             >
-              Delete
+              Log Contact
             </button>
-          )}
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() =>
+                startTransition(async () => {
+                  await toggleFavorite(contact.id, !contact.favorite);
+                })
+              }
+              className={`${pillButton} text-stone-600 hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-800`}
+            >
+              {contact.favorite ? "Unfavorite" : "Favorite"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className={`${pillButton} text-stone-600 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800`}
+            >
+              Edit
+            </button>
+            {confirmingDelete ? (
+              <span className="flex items-center gap-2">
+                <span className="text-stone-500 dark:text-stone-400">
+                  Delete {contact.name}?
+                </span>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() =>
+                    startTransition(async () => {
+                      await deleteContact(contact.id);
+                    })
+                  }
+                  className={`${pillButton} bg-red-600 text-white hover:bg-red-700 disabled:opacity-50`}
+                >
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingDelete(false)}
+                  className={`${pillButton} text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800`}
+                >
+                  Cancel
+                </button>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(true)}
+                className={`${pillButton} text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
+              >
+                Delete
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </li>

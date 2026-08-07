@@ -8,27 +8,28 @@ export function InteractionTimeline({
 }) {
   if (interactions.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+      <p className="rounded-2xl border border-dashed border-stone-300 p-8 text-center text-sm text-stone-500 dark:border-stone-700 dark:text-stone-400">
         No contact logged yet. Use the form above once you reach out.
       </p>
     );
   }
 
   return (
-    <ol className="space-y-4">
+    <ol className="space-y-5 border-l-2 border-stone-200 dark:border-stone-800">
       {interactions.map((interaction) => {
         const occurredAt = new Date(interaction.occurredAt);
         return (
-          <li
-            key={interaction.id}
-            className="border-l-2 border-slate-200 pl-4 dark:border-slate-800"
-          >
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+          <li key={interaction.id} className="relative pl-5">
+            <span
+              className="absolute top-1.5 -left-[5px] h-2 w-2 rounded-full bg-orange-500"
+              aria-hidden="true"
+            />
+            <p className="text-xs text-stone-500 dark:text-stone-400">
               <time dateTime={occurredAt.toISOString()}>
                 {formatRelativeTime(occurredAt)}
               </time>
             </p>
-            <p className="text-sm text-slate-700 break-words dark:text-slate-300">
+            <p className="text-sm break-words text-stone-700 dark:text-stone-300">
               {interaction.note ?? "Logged contact"}
             </p>
           </li>

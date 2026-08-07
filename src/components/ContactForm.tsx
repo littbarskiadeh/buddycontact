@@ -28,7 +28,7 @@ function toFormValues(contact: Contact): ContactFormValues {
 }
 
 const inputClassName =
-  "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:border-slate-700 dark:bg-slate-900";
+  "w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700";
 
 type ContactFormProps = {
   contact?: Contact;
@@ -144,7 +144,7 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
       <div>
         <label
           htmlFor={cadenceId}
-          className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
+          className="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300"
         >
           Follow-up reminder
         </label>
@@ -169,12 +169,12 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
         ))}
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+      <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
         <input
           type="checkbox"
           checked={values.favorite}
           onChange={(e) => update("favorite", e.target.checked)}
-          className="h-4 w-4 rounded border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+          className="h-4 w-4 rounded border-stone-300 text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
         />
         Mark as favorite
       </label>
@@ -183,7 +183,7 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:focus-visible:ring-offset-slate-950"
+          className="rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
         >
           {isPending ? "Saving…" : contact ? "Save Changes" : "Add Contact"}
         </button>
@@ -191,7 +191,7 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
           <button
             type="button"
             onClick={onDone}
-            className="rounded text-sm text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:text-slate-400"
+            className="rounded text-sm text-stone-500 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-stone-400"
           >
             Cancel
           </button>
@@ -233,7 +233,7 @@ function Field({
     <div>
       <label
         htmlFor={id}
-        className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
+        className="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300"
       >
         {label}
         {required && <span className="text-red-500"> *</span>}

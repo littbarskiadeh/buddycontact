@@ -11,15 +11,15 @@ export function AddContactPanel() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 dark:bg-white dark:text-slate-900"
+        className="rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950"
       >
-        + Add contact
+        + Add Contact
       </button>
     );
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+    <div className="animate-fade-in-up w-full rounded-2xl border border-stone-200 bg-surface p-5 shadow-sm dark:border-stone-800">
       <ContactForm onDone={() => setIsOpen(false)} />
     </div>
   );

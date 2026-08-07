@@ -29,7 +29,7 @@ export function LogInteractionForm({ contactId }: { contactId: string }) {
         <p
           role="alert"
           aria-live="polite"
-          className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
+          className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
         >
           {error}
         </p>
@@ -37,7 +37,7 @@ export function LogInteractionForm({ contactId }: { contactId: string }) {
       <div>
         <label
           htmlFor={noteId}
-          className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
+          className="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300"
         >
           What did you talk about? (optional)
         </label>
@@ -47,13 +47,13 @@ export function LogInteractionForm({ contactId }: { contactId: string }) {
           onChange={(e) => setNote(e.target.value)}
           rows={2}
           placeholder="Caught up about their new job…"
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:border-slate-700 dark:bg-slate-900"
+          className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700"
         />
       </div>
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:focus-visible:ring-offset-slate-950"
+        className="rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
       >
         {isPending ? "Logging…" : "Log Contact"}
       </button>

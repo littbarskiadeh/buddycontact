@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { FollowUpBadge } from "@/components/FollowUpBadge";
+import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { InteractionTimeline } from "@/components/InteractionTimeline";
 import { LogInteractionForm } from "@/components/LogInteractionForm";
 import { formatRelativeTime, getFollowUpInfo } from "@/lib/followup";
@@ -9,6 +9,15 @@ import { formatRelativeTime, getFollowUpInfo } from "@/lib/followup";
 type PageProps = {
   params: Promise<{ id: string }>;
 };
+
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
 
 export default async function ContactDetail({ params }: PageProps) {
   const { id } = await params;
@@ -30,75 +39,84 @@ export default async function ContactDetail({ params }: PageProps) {
     lastContactedAt: contact.lastContactedAt,
     createdAt: contact.createdAt,
   });
+  const style = FOLLOWUP_STYLES[followUp.status];
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <Link
         href="/"
-        className="mb-6 inline-block rounded text-sm text-slate-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:text-slate-400"
+        className="mb-6 inline-block rounded text-sm text-stone-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-stone-400"
       >
         ← Back to contacts
       </Link>
 
-      <header className="mb-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {contact.name}
-          </h1>
-          {contact.favorite && (
-            <span role="img" aria-label="Favorite">
-              ⭐
-            </span>
-          )}
-          <FollowUpBadge status={followUp.status} />
+      <header className="animate-fade-in-up mb-6 flex items-start gap-4">
+        <div
+          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-semibold ring-2 ring-offset-2 dark:ring-offset-stone-950 ${style.badge} ${style.ring}`}
+        >
+          {initials(contact.name) || "?"}
         </div>
 
-        <dl className="mt-2 space-y-0.5 text-sm text-slate-600 dark:text-slate-400">
-          {contact.company && (
-            <div>
-              <dt className="sr-only">Company</dt>
-              <dd className="break-words">{contact.company}</dd>
-            </div>
-          )}
-          {contact.email && (
-            <div>
-              <dt className="sr-only">Email</dt>
-              <dd className="break-words">{contact.email}</dd>
-            </div>
-          )}
-          {contact.phone && (
-            <div>
-              <dt className="sr-only">Phone</dt>
-              <dd className="break-words">{contact.phone}</dd>
-            </div>
-          )}
-        </dl>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-balance font-display text-2xl font-semibold text-foreground">
+              {contact.name}
+            </h1>
+            {contact.favorite && (
+              <span role="img" aria-label="Favorite">
+                ⭐
+              </span>
+            )}
+            <FollowUpBadge status={followUp.status} />
+          </div>
 
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          {contact.lastContactedAt
-            ? `Last contacted ${formatRelativeTime(contact.lastContactedAt)}`
-            : "Never contacted"}
-          {contact.cadenceDays
-            ? ` · reminder every ${contact.cadenceDays} days`
-            : " · no reminder set"}
-        </p>
+          <dl className="mt-2 space-y-0.5 text-sm text-stone-600 dark:text-stone-400">
+            {contact.company && (
+              <div>
+                <dt className="sr-only">Company</dt>
+                <dd className="break-words">{contact.company}</dd>
+              </div>
+            )}
+            {contact.email && (
+              <div>
+                <dt className="sr-only">Email</dt>
+                <dd className="break-words">{contact.email}</dd>
+              </div>
+            )}
+            {contact.phone && (
+              <div>
+                <dt className="sr-only">Phone</dt>
+                <dd className="break-words">{contact.phone}</dd>
+              </div>
+            )}
+          </dl>
 
-        {contact.tags.length > 0 && (
-          <ul className="mt-3 flex flex-wrap gap-1.5">
-            {contact.tags.map((tag) => (
-              <li
-                key={tag.id}
-                className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              >
-                {tag.name}
-              </li>
-            ))}
-          </ul>
-        )}
+          <p className="mt-2 text-sm text-stone-500 dark:text-stone-400">
+            {contact.lastContactedAt
+              ? `Last contacted ${formatRelativeTime(contact.lastContactedAt)}`
+              : "Never contacted"}
+            {contact.cadenceDays
+              ? ` · reminder every ${contact.cadenceDays} days`
+              : " · no reminder set"}
+          </p>
+
+          {contact.tags.length > 0 && (
+            <ul className="mt-3 flex flex-wrap gap-1.5">
+              {contact.tags.map((tag) => (
+                <li
+                  key={tag.id}
+                  className="rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                >
+                  {tag.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </header>
 
-      <section className="mb-8 rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-        <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
+      <section className="mb-8 rounded-2xl border border-stone-200 bg-surface p-5 shadow-sm dark:border-stone-800">
+        <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-300">
           Log Contact
         </h2>
         <LogInteractionForm contactId={contact.id} />
@@ -107,7 +125,7 @@ export default async function ContactDetail({ params }: PageProps) {
       <section aria-labelledby="history-heading">
         <h2
           id="history-heading"
-          className="mb-3 text-sm font-semibold tracking-wide text-slate-700 uppercase dark:text-slate-300"
+          className="mb-3 text-sm font-semibold tracking-wide text-stone-700 uppercase dark:text-stone-300"
         >
           History
         </h2>
