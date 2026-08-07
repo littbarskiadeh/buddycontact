@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Check, PhoneCall, Pencil, Star, Trash2, X } from "lucide-react";
-import { deleteContact, logInteraction, toggleFavorite } from "@/app/actions";
+import {
+  deleteContact,
+  logInteraction,
+  snoozeContact,
+  toggleFavorite,
+} from "@/app/actions";
 import { ContactForm } from "@/components/ContactForm";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
+import { SnoozeSelect } from "@/components/SnoozeSelect";
 import { formatRelativeTime, getFollowUpInfo } from "@/lib/followup";
 import type { Contact } from "@/types";
 
@@ -43,6 +49,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
       ? new Date(contact.lastContactedAt)
       : null,
     createdAt: new Date(contact.createdAt),
+    snoozedUntil: contact.snoozedUntil ? new Date(contact.snoozedUntil) : null,
   });
   const style = FOLLOWUP_STYLES[followUp.status];
 
@@ -132,6 +139,16 @@ export function ContactCard({ contact }: { contact: Contact }) {
               <PhoneCall className="h-3.5 w-3.5" aria-hidden="true" />
               Log Contact
             </button>
+            {contact.cadenceDays && (
+              <SnoozeSelect
+                disabled={isPending}
+                onSnooze={(days) =>
+                  startTransition(async () => {
+                    await snoozeContact(contact.id, days);
+                  })
+                }
+              />
+            )}
             <button
               type="button"
               disabled={isPending}

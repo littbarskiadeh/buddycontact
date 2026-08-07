@@ -8,11 +8,18 @@ vi.mock("@/app/actions", () => ({
   deleteContact: vi.fn().mockResolvedValue({ success: true }),
   toggleFavorite: vi.fn().mockResolvedValue({ success: true }),
   logInteraction: vi.fn().mockResolvedValue({ success: true }),
+  snoozeContact: vi.fn().mockResolvedValue({ success: true }),
+  unsnoozeContact: vi.fn().mockResolvedValue({ success: true }),
   createContact: vi.fn().mockResolvedValue({ success: true }),
   updateContact: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-import { deleteContact, logInteraction, toggleFavorite } from "@/app/actions";
+import {
+  deleteContact,
+  logInteraction,
+  snoozeContact,
+  toggleFavorite,
+} from "@/app/actions";
 
 const baseContact: Contact = {
   id: "1",
@@ -23,6 +30,7 @@ const baseContact: Contact = {
   favorite: false,
   cadenceDays: 14,
   lastContactedAt: new Date().toISOString(),
+  snoozedUntil: null,
   tags: [{ id: "t1", name: "mentor" }],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -86,6 +94,22 @@ describe("ContactCard", () => {
 
     expect(deleteContact).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+  });
+
+  it("snoozes the contact for the selected number of days", async () => {
+    const user = userEvent.setup();
+    render(<ContactCard contact={baseContact} />);
+
+    await user.selectOptions(screen.getByLabelText("Snooze reminder"), "7");
+
+    await waitFor(() => {
+      expect(snoozeContact).toHaveBeenCalledWith("1", 7);
+    });
+  });
+
+  it("does not show a snooze control when the contact has no reminder cadence", () => {
+    render(<ContactCard contact={{ ...baseContact, cadenceDays: null }} />);
+    expect(screen.queryByLabelText("Snooze reminder")).not.toBeInTheDocument();
   });
 
   it("switches to edit mode when Edit is clicked", async () => {

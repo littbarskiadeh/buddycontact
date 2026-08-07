@@ -6,7 +6,9 @@ import {
   contactInputSchema,
   contactUpdateSchema,
   interactionInputSchema,
+  snoozeInputSchema,
 } from "@/lib/validation";
+import type { InteractionChannel } from "@/lib/channels";
 import type { ContactFormValues } from "@/types";
 
 function parseTags(raw: string): string[] {
@@ -135,8 +137,9 @@ export async function toggleFavorite(
 export async function logInteraction(
   contactId: string,
   note?: string,
+  channel?: InteractionChannel,
 ): Promise<ActionResult> {
-  const parsed = interactionInputSchema.safeParse({ note });
+  const parsed = interactionInputSchema.safeParse({ note, channel });
 
   if (!parsed.success) {
     return {
@@ -153,13 +156,58 @@ export async function logInteraction(
 
   await prisma.$transaction([
     prisma.interaction.create({
-      data: { contactId, note: parsed.data.note, occurredAt },
+      data: {
+        contactId,
+        note: parsed.data.note,
+        channel: parsed.data.channel,
+        occurredAt,
+      },
     }),
+    // Reaching out supersedes any earlier "not now" — clear the snooze so
+    // the contact doesn't keep showing as snoozed after you've just talked.
     prisma.contact.update({
       where: { id: contactId },
-      data: { lastContactedAt: occurredAt },
+      data: { lastContactedAt: occurredAt, snoozedUntil: null },
     }),
   ]);
+
+  revalidatePath("/");
+  revalidatePath(`/contacts/${contactId}`);
+  return { success: true };
+}
+
+export async function snoozeContact(
+  contactId: string,
+  days: number,
+): Promise<ActionResult> {
+  const parsed = snoozeInputSchema.safeParse({ days });
+
+  if (!parsed.success) {
+    return { success: false, error: "Invalid snooze duration." };
+  }
+
+  const snoozedUntil = new Date(
+    Date.now() + parsed.data.days * 24 * 60 * 60 * 1000,
+  );
+
+  await prisma.contact.update({
+    where: { id: contactId },
+    data: { snoozedUntil },
+  });
+
+  revalidatePath("/");
+  revalidatePath(`/contacts/${contactId}`);
+  revalidatePath("/triage");
+  return { success: true };
+}
+
+export async function unsnoozeContact(
+  contactId: string,
+): Promise<ActionResult> {
+  await prisma.contact.update({
+    where: { id: contactId },
+    data: { snoozedUntil: null },
+  });
 
   revalidatePath("/");
   revalidatePath(`/contacts/${contactId}`);

@@ -39,6 +39,14 @@ export const FOLLOWUP_STYLES: Record<
     ring: "ring-stone-300 dark:ring-stone-600",
     border: "border-l-stone-300 dark:border-l-stone-600",
   },
+  snoozed: {
+    label: "Snoozed",
+    badge:
+      "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300",
+    dot: "bg-violet-500",
+    ring: "ring-violet-400 dark:ring-violet-500",
+    border: "border-l-violet-400 dark:border-l-violet-500",
+  },
 };
 
 export function FollowUpBadge({ status }: { status: FollowUpStatus }) {

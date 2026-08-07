@@ -1,3 +1,5 @@
+import type { InteractionChannel } from "@/lib/channels";
+
 export type Tag = {
   id: string;
   name: string;
@@ -7,6 +9,7 @@ export type Interaction = {
   id: string;
   contactId: string;
   note: string | null;
+  channel: InteractionChannel | null;
   occurredAt: string;
   createdAt: string;
 };
@@ -20,6 +23,7 @@ export type Contact = {
   favorite: boolean;
   cadenceDays: number | null;
   lastContactedAt: string | null;
+  snoozedUntil: string | null;
   tags: Tag[];
   createdAt: string;
   updatedAt: string;

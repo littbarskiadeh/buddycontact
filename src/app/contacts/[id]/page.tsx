@@ -4,9 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { ContactSnoozeControl } from "@/components/ContactSnoozeControl";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { InteractionTimeline } from "@/components/InteractionTimeline";
 import { LogInteractionForm } from "@/components/LogInteractionForm";
+import { TopicSuggestions } from "@/components/TopicSuggestions";
+import type { InteractionChannel } from "@/lib/channels";
 import { formatRelativeTime, getFollowUpInfo } from "@/lib/followup";
 
 type PageProps = {
@@ -55,6 +58,7 @@ export default async function ContactDetail({ params }: PageProps) {
     cadenceDays: contact.cadenceDays,
     lastContactedAt: contact.lastContactedAt,
     createdAt: contact.createdAt,
+    snoozedUntil: contact.snoozedUntil,
   });
   const style = FOLLOWUP_STYLES[followUp.status];
 
@@ -88,6 +92,12 @@ export default async function ContactDetail({ params }: PageProps) {
               />
             )}
             <FollowUpBadge status={followUp.status} />
+            {contact.cadenceDays && (
+              <ContactSnoozeControl
+                contactId={contact.id}
+                isSnoozed={followUp.status === "snoozed"}
+              />
+            )}
           </div>
 
           <dl className="mt-2 space-y-0.5 text-sm text-stone-600 dark:text-stone-400">
@@ -135,6 +145,10 @@ export default async function ContactDetail({ params }: PageProps) {
         </div>
       </header>
 
+      <div className="mb-8">
+        <TopicSuggestions contactId={contact.id} contactName={contact.name} />
+      </div>
+
       <section className="mb-8 rounded-2xl border border-stone-200 bg-surface p-5 shadow-sm dark:border-stone-800">
         <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-300">
           Log Contact
@@ -152,6 +166,7 @@ export default async function ContactDetail({ params }: PageProps) {
         <InteractionTimeline
           interactions={contact.interactions.map((i) => ({
             ...i,
+            channel: i.channel as InteractionChannel | null,
             occurredAt: i.occurredAt.toISOString(),
             createdAt: i.createdAt.toISOString(),
           }))}

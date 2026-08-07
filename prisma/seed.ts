@@ -9,6 +9,7 @@ const prisma = new PrismaClient({ adapter });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const daysAgo = (n: number) => new Date(Date.now() - n * DAY_MS);
+const daysFromNow = (n: number) => new Date(Date.now() + n * DAY_MS);
 
 async function main() {
   await prisma.interaction.deleteMany();
@@ -37,12 +38,14 @@ async function main() {
     data: [
       {
         contactId: ada.id,
+        channel: "call",
         note: "Caught up about the new analytical engine prototype.",
         occurredAt: daysAgo(30),
       },
       {
         contactId: ada.id,
-        note: "Quick call to wish her well before her trip.",
+        channel: "email",
+        note: "Quick note to wish her well before her trip.",
         occurredAt: daysAgo(75),
       },
     ],
@@ -68,13 +71,14 @@ async function main() {
   await prisma.interaction.create({
     data: {
       contactId: grace.id,
+      channel: "text",
       note: "Debugged a tricky compiler issue together.",
       occurredAt: daysAgo(28),
     },
   });
 
-  // On track: reminder every 90 days, contacted recently.
-  await prisma.contact.create({
+  // On track: reminder every 90 days, contacted recently (within this week).
+  const alan = await prisma.contact.create({
     data: {
       name: "Alan Turing",
       email: "alan@example.com",
@@ -88,13 +92,48 @@ async function main() {
       },
     },
   });
+  await prisma.interaction.create({
+    data: {
+      contactId: alan.id,
+      channel: "call",
+      note: "Talked through the new machine design.",
+      occurredAt: daysAgo(5),
+    },
+  });
 
-  // No reminder set, never contacted.
+  // Snoozed: would be overdue at this cadence, but explicitly deferred.
   await prisma.contact.create({
+    data: {
+      name: "Marie Curie",
+      email: "marie@example.com",
+      company: "Sorbonne",
+      cadenceDays: 14,
+      lastContactedAt: daysAgo(20),
+      snoozedUntil: daysFromNow(5),
+      tags: {
+        connectOrCreate: [
+          { where: { name: "mentor" }, create: { name: "mentor" } },
+          { where: { name: "tech" }, create: { name: "tech" } },
+        ],
+      },
+      interactions: {
+        create: {
+          channel: "email",
+          note: "She's mid-experiment — asked to check back next month.",
+          occurredAt: daysAgo(20),
+        },
+      },
+    },
+  });
+
+  // No reminder set, but with a multi-week interaction history — populates
+  // the weekly recap / streak without affecting any due-status calculation.
+  const katherine = await prisma.contact.create({
     data: {
       name: "Katherine Johnson",
       email: "katherine@example.com",
       company: "NASA",
+      lastContactedAt: daysAgo(2),
       tags: {
         connectOrCreate: [
           { where: { name: "mentor" }, create: { name: "mentor" } },
@@ -102,8 +141,30 @@ async function main() {
       },
     },
   });
+  await prisma.interaction.createMany({
+    data: [
+      {
+        contactId: katherine.id,
+        channel: "chat",
+        note: "Caught up about her new orbital mechanics project.",
+        occurredAt: daysAgo(2),
+      },
+      {
+        contactId: katherine.id,
+        channel: "email",
+        note: "Sent her an article she'd like.",
+        occurredAt: daysAgo(10),
+      },
+      {
+        contactId: katherine.id,
+        channel: "social",
+        note: "Liked and commented on her post.",
+        occurredAt: daysAgo(17),
+      },
+    ],
+  });
 
-  console.log("Seeded 4 contacts with follow-up history.");
+  console.log("Seeded 5 contacts with follow-up history.");
 }
 
 main()

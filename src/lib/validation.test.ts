@@ -3,6 +3,7 @@ import {
   contactInputSchema,
   contactUpdateSchema,
   interactionInputSchema,
+  snoozeInputSchema,
 } from "@/lib/validation";
 
 describe("contactInputSchema", () => {
@@ -94,5 +95,42 @@ describe("interactionInputSchema", () => {
       note: "  Caught up over coffee  ",
     });
     expect(result.note).toBe("Caught up over coffee");
+  });
+
+  it("accepts a known channel", () => {
+    const result = interactionInputSchema.safeParse({ channel: "call" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects an unknown channel", () => {
+    const result = interactionInputSchema.safeParse({
+      channel: "carrier_pigeon",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("allows an omitted channel", () => {
+    const result = interactionInputSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.channel).toBeUndefined();
+    }
+  });
+});
+
+describe("snoozeInputSchema", () => {
+  it("accepts a positive whole number of days", () => {
+    const result = snoozeInputSchema.safeParse({ days: 7 });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects zero or negative days", () => {
+    expect(snoozeInputSchema.safeParse({ days: 0 }).success).toBe(false);
+    expect(snoozeInputSchema.safeParse({ days: -3 }).success).toBe(false);
+  });
+
+  it("rejects more than a year out", () => {
+    const result = snoozeInputSchema.safeParse({ days: 400 });
+    expect(result.success).toBe(false);
   });
 });

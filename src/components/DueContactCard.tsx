@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { PhoneCall } from "lucide-react";
-import { logInteraction } from "@/app/actions";
+import { logInteraction, snoozeContact } from "@/app/actions";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
+import { SnoozeSelect } from "@/components/SnoozeSelect";
 import { formatRelativeTime, type FollowUpStatus } from "@/lib/followup";
 
 function initials(name: string): string {
@@ -60,8 +61,17 @@ export function DueContactCard({
         </p>
       </div>
 
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-2">
         <FollowUpBadge status={status} />
+
+        <SnoozeSelect
+          disabled={isPending}
+          onSnooze={(days) =>
+            startTransition(async () => {
+              await snoozeContact(id, days);
+            })
+          }
+        />
 
         <button
           type="button"

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { INTERACTION_CHANNELS } from "@/lib/channels";
 
 function optionalText(maxLength: number, label: string) {
   return z
@@ -63,6 +64,13 @@ export type ContactUpdateInput = z.infer<typeof contactUpdateSchema>;
 
 export const interactionInputSchema = z.object({
   note: optionalText(2000, "Note"),
+  channel: z.enum(INTERACTION_CHANNELS).optional(),
 });
 
 export type InteractionInput = z.infer<typeof interactionInputSchema>;
+
+export const snoozeInputSchema = z.object({
+  days: z.number().int().positive().max(365),
+});
+
+export type SnoozeInput = z.infer<typeof snoozeInputSchema>;

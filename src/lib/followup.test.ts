@@ -3,6 +3,7 @@ import {
   compareFollowUpUrgency,
   formatRelativeTime,
   getFollowUpInfo,
+  getWeeklyRecap,
 } from "@/lib/followup";
 
 const NOW = new Date("2026-08-15T12:00:00Z");
@@ -151,5 +152,106 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(new Date(NOW.getTime() - 60 * DAY_MS), NOW)).toBe(
       "2 months ago",
     );
+  });
+});
+
+describe("getFollowUpInfo snooze handling", () => {
+  it("reports snoozed when snoozedUntil is in the future, overriding cadence", () => {
+    const info = getFollowUpInfo(
+      {
+        cadenceDays: 7,
+        lastContactedAt: new Date(NOW.getTime() - 30 * DAY_MS),
+        createdAt: NOW,
+        snoozedUntil: new Date(NOW.getTime() + 3 * DAY_MS),
+      },
+      NOW,
+    );
+    expect(info.status).toBe("snoozed");
+  });
+
+  it("ignores a snoozedUntil that has already passed", () => {
+    const info = getFollowUpInfo(
+      {
+        cadenceDays: 7,
+        lastContactedAt: new Date(NOW.getTime() - 30 * DAY_MS),
+        createdAt: NOW,
+        snoozedUntil: new Date(NOW.getTime() - 1 * DAY_MS),
+      },
+      NOW,
+    );
+    expect(info.status).toBe("overdue");
+  });
+});
+
+describe("getWeeklyRecap", () => {
+  it("counts distinct contacts reached this week, not raw interaction count", () => {
+    const recap = getWeeklyRecap(
+      [
+        { contactId: "a", occurredAt: new Date(NOW.getTime() - 1 * DAY_MS) },
+        { contactId: "a", occurredAt: new Date(NOW.getTime() - 2 * DAY_MS) },
+        { contactId: "b", occurredAt: new Date(NOW.getTime() - 3 * DAY_MS) },
+      ],
+      NOW,
+    );
+    expect(recap.contactedThisWeek).toBe(2);
+  });
+
+  it("excludes interactions older than 7 days from the weekly count", () => {
+    const recap = getWeeklyRecap(
+      [{ contactId: "a", occurredAt: new Date(NOW.getTime() - 8 * DAY_MS) }],
+      NOW,
+    );
+    expect(recap.contactedThisWeek).toBe(0);
+  });
+
+  it("counts consecutive weeks with activity as a streak", () => {
+    const recap = getWeeklyRecap(
+      [
+        { contactId: "a", occurredAt: new Date(NOW.getTime() - 2 * DAY_MS) }, // this week
+        { contactId: "b", occurredAt: new Date(NOW.getTime() - 10 * DAY_MS) }, // last week
+        { contactId: "c", occurredAt: new Date(NOW.getTime() - 17 * DAY_MS) }, // 2 weeks ago
+      ],
+      NOW,
+    );
+    expect(recap.streakWeeks).toBe(3);
+  });
+
+  it("does not break the streak for the current, still-in-progress week", () => {
+    const recap = getWeeklyRecap(
+      [{ contactId: "a", occurredAt: new Date(NOW.getTime() - 10 * DAY_MS) }], // last week only
+      NOW,
+    );
+    expect(recap.streakWeeks).toBe(1);
+  });
+
+  it("tolerates exactly one missed week (grace) without resetting the streak", () => {
+    const recap = getWeeklyRecap(
+      [
+        { contactId: "a", occurredAt: new Date(NOW.getTime() - 2 * DAY_MS) }, // this week
+        // last week: nothing (grace)
+        { contactId: "b", occurredAt: new Date(NOW.getTime() - 17 * DAY_MS) }, // 2 weeks ago
+      ],
+      NOW,
+    );
+    expect(recap.streakWeeks).toBe(2);
+  });
+
+  it("breaks the streak on a second missed week", () => {
+    const recap = getWeeklyRecap(
+      [
+        { contactId: "a", occurredAt: new Date(NOW.getTime() - 2 * DAY_MS) }, // this week
+        // last week: nothing (grace used)
+        // 2 weeks ago: nothing (second miss -> break)
+        { contactId: "b", occurredAt: new Date(NOW.getTime() - 24 * DAY_MS) }, // 3 weeks ago — should not count
+      ],
+      NOW,
+    );
+    expect(recap.streakWeeks).toBe(1);
+  });
+
+  it("returns zero streak when there is no activity at all", () => {
+    const recap = getWeeklyRecap([], NOW);
+    expect(recap.streakWeeks).toBe(0);
+    expect(recap.contactedThisWeek).toBe(0);
   });
 });

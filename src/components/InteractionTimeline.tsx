@@ -1,4 +1,5 @@
 import { History } from "lucide-react";
+import { CHANNEL_LABELS } from "@/lib/channels";
 import { formatRelativeTime } from "@/lib/followup";
 import type { Interaction } from "@/types";
 
@@ -34,6 +35,15 @@ export function InteractionTimeline({
               <time dateTime={occurredAt.toISOString()}>
                 {formatRelativeTime(occurredAt)}
               </time>
+              {interaction.channel && (
+                <>
+                  {" "}
+                  ·{" "}
+                  <span className="font-medium">
+                    {CHANNEL_LABELS[interaction.channel]}
+                  </span>
+                </>
+              )}
             </p>
             <p className="text-sm break-words text-stone-700 dark:text-stone-300">
               {interaction.note ?? "Logged contact"}

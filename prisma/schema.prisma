@@ -17,6 +17,9 @@ model Contact {
   // Follow-up cadence in days (e.g. 14 = "every 2 weeks"). Null = no reminder tracked.
   cadenceDays     Int?
   lastContactedAt DateTime?
+  // When set (and in the future), suppresses "due for follow-up" regardless
+  // of cadence — a deliberate "not now" that doesn't punish the streak.
+  snoozedUntil    DateTime?
   tags            Tag[]
   interactions    Interaction[]
   createdAt       DateTime      @default(now())
@@ -28,6 +31,9 @@ model Interaction {
   contactId  String
   contact    Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   note       String?
+  // Free-form, small closed vocabulary — kept as a plain string (not a Prisma
+  // enum) since SQLite has no native enum type; validated in src/lib/validation.ts.
+  channel    String?
   occurredAt DateTime @default(now())
   createdAt  DateTime @default(now())
 

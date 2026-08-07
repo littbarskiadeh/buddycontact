@@ -1,7 +1,17 @@
 const DAY_MS = 24 * 60 * 60 * 1000;
+const WEEK_MS = 7 * DAY_MS;
 const DUE_SOON_WINDOW_DAYS = 3;
 
-export type FollowUpStatus = "overdue" | "due-soon" | "on-track" | "no-cadence";
+/**
+ * A plain helper (not a component/hook) so calling Date.now() here doesn't
+ * trip the react-hooks/purity rule at call sites inside Server Components.
+ */
+export function getRecapCutoffDate(lookbackDays: number): Date {
+  return new Date(Date.now() - lookbackDays * DAY_MS);
+}
+
+export type FollowUpStatus =
+  "overdue" | "due-soon" | "on-track" | "no-cadence" | "snoozed";
 
 export type FollowUpInfo = {
   status: FollowUpStatus;
@@ -13,12 +23,21 @@ type FollowUpContact = {
   cadenceDays: number | null;
   lastContactedAt: Date | null;
   createdAt: Date;
+  snoozedUntil?: Date | null;
 };
 
 export function getFollowUpInfo(
   contact: FollowUpContact,
   now: Date = new Date(),
 ): FollowUpInfo {
+  if (contact.snoozedUntil && contact.snoozedUntil.getTime() > now.getTime()) {
+    return {
+      status: "snoozed",
+      dueAt: contact.snoozedUntil,
+      daysUntilDue: null,
+    };
+  }
+
   if (!contact.cadenceDays) {
     return { status: "no-cadence", dueAt: null, daysUntilDue: null };
   }
@@ -45,6 +64,7 @@ export function compareFollowUpUrgency(
     "due-soon": 1,
     "on-track": 2,
     "no-cadence": 3,
+    snoozed: 4,
   };
 
   if (rank[a.status] !== rank[b.status]) {
@@ -88,3 +108,72 @@ export const CADENCE_PRESETS: { label: string; days: number }[] = [
   { label: "Every 3 months", days: 90 },
   { label: "Every 6 months", days: 180 },
 ];
+
+export const SNOOZE_PRESETS: { label: string; days: number }[] = [
+  { label: "3 days", days: 3 },
+  { label: "1 week", days: 7 },
+  { label: "2 weeks", days: 14 },
+];
+
+export type WeeklyRecap = {
+  /** Distinct contacts logged in the last 7 days. */
+  contactedThisWeek: number;
+  /**
+   * Consecutive weeks (rolling 7-day buckets, most recent first) with at
+   * least one logged interaction. Tolerates exactly one missed week per
+   * streak (a "grace" week) so a single busy week doesn't reset progress —
+   * see the ethical-gamification note in getWeeklyRecap.
+   */
+  streakWeeks: number;
+};
+
+/**
+ * Computed, not stored: a streak with a built-in one-time grace period per
+ * break, rather than a manually-invoked "streak freeze". Research on
+ * ethical engagement design (Duolingo's streak-freeze mechanic) shows
+ * unforgiving streaks create anxiety without improving the underlying
+ * behavior — tolerating one gap keeps the encouragement without the guilt.
+ */
+export function getWeeklyRecap(
+  interactions: { contactId: string; occurredAt: Date }[],
+  now: Date = new Date(),
+): WeeklyRecap {
+  const currentWeekStart = now.getTime() - WEEK_MS;
+  const contactedThisWeek = new Set(
+    interactions
+      .filter((i) => i.occurredAt.getTime() >= currentWeekStart)
+      .map((i) => i.contactId),
+  ).size;
+
+  let streakWeeks = 0;
+  let graceUsed = false;
+  let weekEnd = now.getTime();
+  let isCurrentWeek = true;
+
+  // Walk backward one rolling week at a time. Cap the lookback so an old,
+  // sparsely-logged account doesn't loop indefinitely.
+  for (let i = 0; i < 104; i++) {
+    const weekStart = weekEnd - WEEK_MS;
+    const hasActivity = interactions.some(
+      (interaction) =>
+        interaction.occurredAt.getTime() >= weekStart &&
+        interaction.occurredAt.getTime() < weekEnd,
+    );
+
+    if (hasActivity) {
+      streakWeeks++;
+    } else if (isCurrentWeek) {
+      // The current week isn't over yet — don't break the streak for it,
+      // just don't count it either.
+    } else if (!graceUsed) {
+      graceUsed = true;
+    } else {
+      break;
+    }
+
+    isCurrentWeek = false;
+    weekEnd = weekStart;
+  }
+
+  return { contactedThisWeek, streakWeeks };
+}
