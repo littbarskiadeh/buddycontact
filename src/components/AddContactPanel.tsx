@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { UserPlus } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
 
 export function AddContactPanel() {
@@ -11,9 +12,10 @@ export function AddContactPanel() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950"
+        className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950"
       >
-        + Add Contact
+        <UserPlus className="h-4 w-4" aria-hidden="true" />
+        Add Contact
       </button>
     );
   }

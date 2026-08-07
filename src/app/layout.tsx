@@ -13,9 +13,29 @@ const body = Inter({
   subsets: ["latin"],
 });
 
+const title = "BuddyContact";
+const description =
+  "Never lose touch. Track who you owe a call, text, or coffee.";
+
 export const metadata: Metadata = {
-  title: "BuddyContact",
-  description: "Never lose touch. Track who you owe a call, text, or coffee.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  ),
+  title: {
+    default: title,
+    template: `%s · ${title}`,
+  },
+  description,
+  openGraph: {
+    title,
+    description,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
 };
 
 export const viewport: Viewport = {

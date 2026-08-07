@@ -24,6 +24,10 @@ relationships (personal or professional) don't quietly go cold.
 - Reviewed against the [Vercel Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines):
   labeled inputs, visible focus states, `aria-live` on async updates, debounced
   search, semantic markup
+- Route-level loading skeletons, a branded 404, and an error boundary —
+  no blank screens or default framework pages
+- Programmatically generated favicon/app icon and OpenGraph metadata for
+  link previews
 
 ## Tech stack
 

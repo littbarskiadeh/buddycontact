@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { Check, PhoneCall, Pencil, Star, Trash2, X } from "lucide-react";
 import { deleteContact, logInteraction, toggleFavorite } from "@/app/actions";
 import { ContactForm } from "@/components/ContactForm";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
@@ -20,7 +21,7 @@ function initials(name: string): string {
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950 rounded";
 
-const pillButton = `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${focusRing}`;
+const pillButton = `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${focusRing}`;
 
 export function ContactCard({ contact }: { contact: Contact }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -67,9 +68,11 @@ export function ContactCard({ contact }: { contact: Contact }) {
               {contact.name}
             </Link>
             {contact.favorite && (
-              <span role="img" aria-label="Favorite">
-                ⭐
-              </span>
+              <Star
+                className="h-4 w-4 fill-orange-500 text-orange-500"
+                role="img"
+                aria-label="Favorite"
+              />
             )}
             <FollowUpBadge status={followUp.status} />
           </div>
@@ -126,6 +129,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
               }
               className={`${pillButton} bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 ${justLogged ? "animate-pulse-once" : ""}`}
             >
+              <PhoneCall className="h-3.5 w-3.5" aria-hidden="true" />
               Log Contact
             </button>
             <button
@@ -138,6 +142,10 @@ export function ContactCard({ contact }: { contact: Contact }) {
               }
               className={`${pillButton} text-stone-600 hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-800`}
             >
+              <Star
+                className={`h-3.5 w-3.5 ${contact.favorite ? "fill-current" : ""}`}
+                aria-hidden="true"
+              />
               {contact.favorite ? "Unfavorite" : "Favorite"}
             </button>
             <button
@@ -145,6 +153,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
               onClick={() => setIsEditing(true)}
               className={`${pillButton} text-stone-600 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800`}
             >
+              <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
               Edit
             </button>
             {confirmingDelete ? (
@@ -162,6 +171,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
                   }
                   className={`${pillButton} bg-red-600 text-white hover:bg-red-700 disabled:opacity-50`}
                 >
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
                   Confirm
                 </button>
                 <button
@@ -169,6 +179,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
                   onClick={() => setConfirmingDelete(false)}
                   className={`${pillButton} text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800`}
                 >
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
                   Cancel
                 </button>
               </span>
@@ -178,6 +189,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
                 onClick={() => setConfirmingDelete(true)}
                 className={`${pillButton} text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
               >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 Delete
               </button>
             )}

@@ -1,3 +1,4 @@
+import { History } from "lucide-react";
 import { formatRelativeTime } from "@/lib/followup";
 import type { Interaction } from "@/types";
 
@@ -8,9 +9,14 @@ export function InteractionTimeline({
 }) {
   if (interactions.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-stone-300 p-8 text-center text-sm text-stone-500 dark:border-stone-700 dark:text-stone-400">
-        No contact logged yet. Use the form above once you reach out.
-      </p>
+      <div className="flex flex-col items-center rounded-2xl border border-dashed border-stone-300 p-8 text-center dark:border-stone-700">
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500">
+          <History className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <p className="text-sm text-stone-500 dark:text-stone-400">
+          No contact logged yet. Use the form above once you reach out.
+        </p>
+      </div>
     );
   }
 

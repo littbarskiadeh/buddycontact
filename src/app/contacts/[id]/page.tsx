@@ -1,5 +1,8 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { InteractionTimeline } from "@/components/InteractionTimeline";
@@ -19,16 +22,30 @@ function initials(name: string): string {
     .join("");
 }
 
-export default async function ContactDetail({ params }: PageProps) {
-  const { id } = await params;
-
-  const contact = await prisma.contact.findUnique({
+// Deduplicated per-request: generateMetadata and the page body both call
+// this, but React.cache() ensures it only hits the database once.
+const getContact = cache((id: string) =>
+  prisma.contact.findUnique({
     where: { id },
     include: {
       tags: true,
       interactions: { orderBy: { occurredAt: "desc" } },
     },
-  });
+  }),
+);
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const contact = await getContact(id);
+  return { title: contact?.name ?? "Contact not found" };
+}
+
+export default async function ContactDetail({ params }: PageProps) {
+  const { id } = await params;
+
+  const contact = await getContact(id);
 
   if (!contact) {
     notFound();
@@ -45,9 +62,10 @@ export default async function ContactDetail({ params }: PageProps) {
     <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <Link
         href="/"
-        className="mb-6 inline-block rounded text-sm text-stone-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-stone-400"
+        className="mb-6 inline-flex items-center gap-1.5 rounded text-sm text-stone-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-stone-400"
       >
-        ← Back to contacts
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        Back to contacts
       </Link>
 
       <header className="animate-fade-in-up mb-6 flex items-start gap-4">
@@ -63,9 +81,11 @@ export default async function ContactDetail({ params }: PageProps) {
               {contact.name}
             </h1>
             {contact.favorite && (
-              <span role="img" aria-label="Favorite">
-                ⭐
-              </span>
+              <Star
+                className="h-4 w-4 fill-orange-500 text-orange-500"
+                role="img"
+                aria-label="Favorite"
+              />
             )}
             <FollowUpBadge status={followUp.status} />
           </div>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { PhoneCall } from "lucide-react";
 import { logInteraction } from "@/app/actions";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { formatRelativeTime, type FollowUpStatus } from "@/lib/followup";
@@ -37,7 +38,7 @@ export function DueContactCard({
 
   return (
     <li
-      className={`animate-fade-in-up flex items-center gap-3 rounded-2xl border-t border-r border-b border-t-stone-200 border-r-stone-200 border-b-stone-200 bg-surface px-4 py-3 shadow-sm transition-shadow hover:shadow-md dark:border-t-stone-800 dark:border-r-stone-800 dark:border-b-stone-800 border-l-4 ${style.border}`}
+      className={`animate-fade-in-up flex flex-wrap items-center gap-3 rounded-2xl border-t border-r border-b border-t-stone-200 border-r-stone-200 border-b-stone-200 bg-surface p-4 shadow-sm transition-shadow hover:shadow-md dark:border-t-stone-800 dark:border-r-stone-800 dark:border-b-stone-800 border-l-4 ${style.border}`}
     >
       <div
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${style.badge}`}
@@ -45,7 +46,7 @@ export function DueContactCard({
         {initials(name) || "?"}
       </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-36 flex-1">
         <Link
           href={`/contacts/${id}`}
           className={`truncate font-medium text-foreground hover:underline ${focusRing}`}
@@ -59,22 +60,25 @@ export function DueContactCard({
         </p>
       </div>
 
-      <FollowUpBadge status={status} />
+      <div className="ml-auto flex items-center gap-3">
+        <FollowUpBadge status={status} />
 
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={() =>
-          startTransition(async () => {
-            await logInteraction(id);
-            setJustLogged(true);
-            setTimeout(() => setJustLogged(false), 350);
-          })
-        }
-        className={`shrink-0 rounded-full bg-orange-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 disabled:opacity-50 ${focusRing} ${justLogged ? "animate-pulse-once" : ""}`}
-      >
-        Log Contact
-      </button>
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() =>
+            startTransition(async () => {
+              await logInteraction(id);
+              setJustLogged(true);
+              setTimeout(() => setJustLogged(false), 350);
+            })
+          }
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full bg-orange-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 disabled:opacity-50 ${focusRing} ${justLogged ? "animate-pulse-once" : ""}`}
+        >
+          <PhoneCall className="h-3.5 w-3.5" aria-hidden="true" />
+          Log Contact
+        </button>
+      </div>
     </li>
   );
 }
