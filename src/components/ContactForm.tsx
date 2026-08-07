@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useRef, useState, useTransition } from "react";
 import { createContact, updateContact } from "@/app/actions";
+import { CADENCE_PRESETS } from "@/lib/followup";
 import type { Contact, ContactFormValues } from "@/types";
 
 const emptyValues: ContactFormValues = {
@@ -9,9 +10,9 @@ const emptyValues: ContactFormValues = {
   email: "",
   phone: "",
   company: "",
-  notes: "",
   favorite: false,
   tags: "",
+  cadenceDays: "",
 };
 
 function toFormValues(contact: Contact): ContactFormValues {
@@ -20,11 +21,14 @@ function toFormValues(contact: Contact): ContactFormValues {
     email: contact.email ?? "",
     phone: contact.phone ?? "",
     company: contact.company ?? "",
-    notes: contact.notes ?? "",
     favorite: contact.favorite,
     tags: contact.tags.map((t) => t.name).join(", "),
+    cadenceDays: contact.cadenceDays ? String(contact.cadenceDays) : "",
   };
 }
+
+const inputClassName =
+  "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:border-slate-700 dark:bg-slate-900";
 
 type ContactFormProps = {
   contact?: Contact;
@@ -38,7 +42,8 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const notesId = useId();
+  const cadenceId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
 
   function update<K extends keyof ContactFormValues>(
     key: K,
@@ -60,6 +65,11 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
       if (!result.success) {
         setFormError(result.error ?? "Something went wrong.");
         setFieldErrors(result.fieldErrors ?? {});
+        requestAnimationFrame(() => {
+          formRef.current
+            ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+            ?.focus();
+        });
         return;
       }
 
@@ -71,9 +81,18 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      noValidate
+    >
       {formError && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p
+          role="alert"
+          aria-live="polite"
+          className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
+        >
           {formError}
         </p>
       )}
@@ -85,6 +104,7 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
           value={values.name}
           onChange={(v) => update("name", v)}
           errors={fieldErrors.name}
+          autoComplete="name"
         />
         <Field
           label="Email"
@@ -92,18 +112,24 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
           value={values.email}
           onChange={(v) => update("email", v)}
           errors={fieldErrors.email}
+          autoComplete="email"
+          spellCheck={false}
         />
         <Field
           label="Phone"
+          type="tel"
+          inputMode="tel"
           value={values.phone}
           onChange={(v) => update("phone", v)}
           errors={fieldErrors.phone}
+          autoComplete="tel"
         />
         <Field
           label="Company"
           value={values.company}
           onChange={(v) => update("company", v)}
           errors={fieldErrors.company}
+          autoComplete="organization"
         />
       </div>
 
@@ -112,23 +138,35 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
         value={values.tags}
         onChange={(v) => update("tags", v)}
         errors={fieldErrors.tags}
-        placeholder="friend, work, client"
+        placeholder="friend, work, client…"
       />
 
       <div>
         <label
-          htmlFor={notesId}
+          htmlFor={cadenceId}
           className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
         >
-          Notes
+          Follow-up reminder
         </label>
-        <textarea
-          id={notesId}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 dark:border-slate-700 dark:bg-slate-900"
-          rows={3}
-          value={values.notes}
-          onChange={(e) => update("notes", e.target.value)}
-        />
+        <select
+          id={cadenceId}
+          value={values.cadenceDays}
+          onChange={(e) => update("cadenceDays", e.target.value)}
+          aria-invalid={Boolean(fieldErrors.cadenceDays?.length)}
+          className={inputClassName}
+        >
+          <option value="">No reminder</option>
+          {CADENCE_PRESETS.map((preset) => (
+            <option key={preset.days} value={preset.days}>
+              {preset.label}
+            </option>
+          ))}
+        </select>
+        {fieldErrors.cadenceDays?.map((err) => (
+          <p key={err} className="mt-1 text-xs text-red-600 dark:text-red-400">
+            {err}
+          </p>
+        ))}
       </div>
 
       <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
@@ -136,7 +174,7 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
           type="checkbox"
           checked={values.favorite}
           onChange={(e) => update("favorite", e.target.checked)}
-          className="h-4 w-4 rounded border-slate-300"
+          className="h-4 w-4 rounded border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
         />
         Mark as favorite
       </label>
@@ -145,15 +183,15 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50 dark:bg-white dark:text-slate-900"
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:focus-visible:ring-offset-slate-950"
         >
-          {isPending ? "Saving…" : contact ? "Save changes" : "Add contact"}
+          {isPending ? "Saving…" : contact ? "Save Changes" : "Add Contact"}
         </button>
         {onDone && (
           <button
             type="button"
             onClick={onDone}
-            className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400"
+            className="rounded text-sm text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:text-slate-400"
           >
             Cancel
           </button>
@@ -168,9 +206,12 @@ type FieldProps = {
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   required?: boolean;
   errors?: string[];
   placeholder?: string;
+  autoComplete?: string;
+  spellCheck?: boolean;
 };
 
 function Field({
@@ -178,9 +219,12 @@ function Field({
   value,
   onChange,
   type = "text",
+  inputMode,
   required,
   errors,
   placeholder,
+  autoComplete,
+  spellCheck,
 }: FieldProps) {
   const id = useId();
   const hasErrors = Boolean(errors?.length);
@@ -197,11 +241,14 @@ function Field({
       <input
         id={id}
         type={type}
+        inputMode={inputMode}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={hasErrors}
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 dark:border-slate-700 dark:bg-slate-900"
+        autoComplete={autoComplete}
+        spellCheck={spellCheck}
+        className={inputClassName}
       />
       {errors?.map((err) => (
         <p key={err} className="mt-1 text-xs text-red-600 dark:text-red-400">

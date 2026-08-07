@@ -1,8 +1,13 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import type { Tag } from "@/types";
+
+const SEARCH_DEBOUNCE_MS = 300;
+
+const controlClassName =
+  "rounded-md border border-slate-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:border-slate-700 dark:bg-slate-900";
 
 export function SearchBar({ tags }: { tags: Tag[] }) {
   const router = useRouter();
@@ -10,27 +15,39 @@ export function SearchBar({ tags }: { tags: Tag[] }) {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [isPending, startTransition] = useTransition();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function pushParams(next: { q?: string; tag?: string }) {
+  // Keep the input in sync when the URL changes from elsewhere (browser
+  // back/forward, or the tag filter), not just from typing in this box.
+  // Adjusting state during render (rather than in an effect) avoids an
+  // extra render pass — see https://react.dev/learn/you-might-not-need-an-effect
+  const searchParamsKey = searchParams.toString();
+  const [prevSearchParamsKey, setPrevSearchParamsKey] =
+    useState(searchParamsKey);
+  if (searchParamsKey !== prevSearchParamsKey) {
+    setPrevSearchParamsKey(searchParamsKey);
+    setQuery(searchParams.get("q") ?? "");
+  }
+
+  function pushParam(key: "q" | "tag", value: string) {
     const params = new URLSearchParams(searchParams.toString());
-    const q = next.q ?? searchParams.get("q") ?? "";
-    const tag = next.tag ?? searchParams.get("tag") ?? "";
-
-    if (q) {
-      params.set("q", q);
+    if (value) {
+      params.set(key, value);
     } else {
-      params.delete("q");
+      params.delete(key);
     }
-
-    if (tag) {
-      params.set("tag", tag);
-    } else {
-      params.delete("tag");
-    }
-
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}`);
     });
+  }
+
+  function handleQueryChange(value: string) {
+    setQuery(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(
+      () => pushParam("q", value),
+      SEARCH_DEBOUNCE_MS,
+    );
   }
 
   const activeTag = searchParams.get("tag") ?? "";
@@ -40,18 +57,17 @@ export function SearchBar({ tags }: { tags: Tag[] }) {
       <input
         type="search"
         value={query}
+        aria-label="Search contacts"
         placeholder="Search by name, email, or company…"
-        onChange={(e) => {
-          setQuery(e.target.value);
-          pushParams({ q: e.target.value });
-        }}
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 sm:max-w-sm dark:border-slate-700 dark:bg-slate-900"
+        onChange={(e) => handleQueryChange(e.target.value)}
+        className={`w-full sm:max-w-sm ${controlClassName}`}
       />
 
       <select
         value={activeTag}
-        onChange={(e) => pushParams({ tag: e.target.value })}
-        className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 dark:border-slate-700 dark:bg-slate-900"
+        aria-label="Filter by tag"
+        onChange={(e) => pushParam("tag", e.target.value)}
+        className={controlClassName}
       >
         <option value="">All tags</option>
         {tags.map((tag) => (
@@ -61,7 +77,9 @@ export function SearchBar({ tags }: { tags: Tag[] }) {
         ))}
       </select>
 
-      {isPending && <span className="text-xs text-slate-400">Searching…</span>}
+      <span aria-live="polite" className="text-xs text-slate-400">
+        {isPending ? "Searching…" : ""}
+      </span>
     </div>
   );
 }

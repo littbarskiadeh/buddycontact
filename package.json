@@ -2,7 +2,7 @@
   "name": "buddycontact",
   "version": "0.1.0",
   "private": true,
-  "description": "A simple, fast personal contact management app built with Next.js, TypeScript, and Prisma.",
+  "description": "Never lose touch — a relationship follow-up tracker built with Next.js, TypeScript, and Prisma.",
   "author": "Littbarski Adeh",
   "license": "MIT",
   "repository": {

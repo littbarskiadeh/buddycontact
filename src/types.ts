@@ -3,17 +3,30 @@ export type Tag = {
   name: string;
 };
 
+export type Interaction = {
+  id: string;
+  contactId: string;
+  note: string | null;
+  occurredAt: string;
+  createdAt: string;
+};
+
 export type Contact = {
   id: string;
   name: string;
   email: string | null;
   phone: string | null;
   company: string | null;
-  notes: string | null;
   favorite: boolean;
+  cadenceDays: number | null;
+  lastContactedAt: string | null;
   tags: Tag[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type ContactWithInteractions = Contact & {
+  interactions: Interaction[];
 };
 
 export type ContactFormValues = {
@@ -21,7 +34,7 @@ export type ContactFormValues = {
   email: string;
   phone: string;
   company: string;
-  notes: string;
   favorite: boolean;
   tags: string;
+  cadenceDays: string;
 };

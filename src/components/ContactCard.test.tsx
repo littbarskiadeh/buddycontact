@@ -7,11 +7,12 @@ import type { Contact } from "@/types";
 vi.mock("@/app/actions", () => ({
   deleteContact: vi.fn().mockResolvedValue({ success: true }),
   toggleFavorite: vi.fn().mockResolvedValue({ success: true }),
+  logInteraction: vi.fn().mockResolvedValue({ success: true }),
   createContact: vi.fn().mockResolvedValue({ success: true }),
   updateContact: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-import { deleteContact, toggleFavorite } from "@/app/actions";
+import { deleteContact, logInteraction, toggleFavorite } from "@/app/actions";
 
 const baseContact: Contact = {
   id: "1",
@@ -19,8 +20,9 @@ const baseContact: Contact = {
   email: "ada@example.com",
   phone: "555-0100",
   company: "Analytical Engines Ltd",
-  notes: null,
   favorite: false,
+  cadenceDays: 14,
+  lastContactedAt: new Date().toISOString(),
   tags: [{ id: "t1", name: "mentor" }],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -29,7 +31,6 @@ const baseContact: Contact = {
 describe("ContactCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   it("renders contact details and tags", () => {
@@ -37,6 +38,17 @@ describe("ContactCard", () => {
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
     expect(screen.getByText("ada@example.com")).toBeInTheDocument();
     expect(screen.getByText("mentor")).toBeInTheDocument();
+  });
+
+  it("calls logInteraction when Log Contact is clicked", async () => {
+    const user = userEvent.setup();
+    render(<ContactCard contact={baseContact} />);
+
+    await user.click(screen.getByRole("button", { name: "Log Contact" }));
+
+    await waitFor(() => {
+      expect(logInteraction).toHaveBeenCalledWith("1");
+    });
   });
 
   it("calls toggleFavorite with the flipped value when clicked", async () => {
@@ -50,26 +62,30 @@ describe("ContactCard", () => {
     });
   });
 
-  it("asks for confirmation and calls deleteContact when confirmed", async () => {
+  it("requires a confirm click before deleting", async () => {
     const user = userEvent.setup();
     render(<ContactCard contact={baseContact} />);
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(deleteContact).not.toHaveBeenCalled();
 
-    expect(window.confirm).toHaveBeenCalledWith("Delete Ada Lovelace?");
+    expect(screen.getByText("Delete Ada Lovelace?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
     await waitFor(() => {
       expect(deleteContact).toHaveBeenCalledWith("1");
     });
   });
 
-  it("does not delete when confirmation is declined", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(false);
+  it("does not delete when the delete confirmation is cancelled", async () => {
     const user = userEvent.setup();
     render(<ContactCard contact={baseContact} />);
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(deleteContact).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
   });
 
   it("switches to edit mode when Edit is clicked", async () => {
@@ -79,7 +95,7 @@ describe("ContactCard", () => {
     await user.click(screen.getByRole("button", { name: "Edit" }));
 
     expect(
-      screen.getByRole("button", { name: "Save changes" }),
+      screen.getByRole("button", { name: "Save Changes" }),
     ).toBeInTheDocument();
   });
 });

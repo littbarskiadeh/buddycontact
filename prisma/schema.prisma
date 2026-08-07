@@ -8,16 +8,30 @@ datasource db {
 }
 
 model Contact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  company   String?
-  notes     String?
-  favorite  Boolean  @default(false)
-  tags      Tag[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String        @id @default(cuid())
+  name            String
+  email           String?
+  phone           String?
+  company         String?
+  favorite        Boolean       @default(false)
+  // Follow-up cadence in days (e.g. 14 = "every 2 weeks"). Null = no reminder tracked.
+  cadenceDays     Int?
+  lastContactedAt DateTime?
+  tags            Tag[]
+  interactions    Interaction[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Interaction {
+  id         String   @id @default(cuid())
+  contactId  String
+  contact    Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  note       String?
+  occurredAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([contactId, occurredAt])
 }
 
 model Tag {

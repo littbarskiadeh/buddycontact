@@ -22,7 +22,7 @@ describe("ContactForm", () => {
 
     await user.type(screen.getByLabelText(/Name/), "Grace Hopper");
     await user.type(screen.getByLabelText(/Email/), "grace@navy.mil");
-    await user.click(screen.getByRole("button", { name: "Add contact" }));
+    await user.click(screen.getByRole("button", { name: "Add Contact" }));
 
     await waitFor(() => {
       expect(createContact).toHaveBeenCalledWith(
@@ -43,7 +43,7 @@ describe("ContactForm", () => {
     const user = userEvent.setup();
     render(<ContactForm />);
 
-    await user.click(screen.getByRole("button", { name: "Add contact" }));
+    await user.click(screen.getByRole("button", { name: "Add Contact" }));
 
     expect(
       await screen.findByText("Please fix the highlighted fields."),
@@ -58,8 +58,29 @@ describe("ContactForm", () => {
     render(<ContactForm onDone={onDone} />);
 
     await user.type(screen.getByLabelText(/Name/), "Grace Hopper");
-    await user.click(screen.getByRole("button", { name: "Add contact" }));
+    await user.click(screen.getByRole("button", { name: "Add Contact" }));
 
     await waitFor(() => expect(onDone).toHaveBeenCalled());
+  });
+
+  it("includes the selected follow-up cadence in the submitted values", async () => {
+    vi.mocked(createContact).mockResolvedValue({ success: true });
+    const user = userEvent.setup();
+    render(<ContactForm />);
+
+    await user.type(screen.getByLabelText(/Name/), "Grace Hopper");
+    await user.selectOptions(screen.getByLabelText("Follow-up reminder"), "14");
+    await user.click(screen.getByRole("button", { name: "Add Contact" }));
+
+    await waitFor(() => {
+      expect(createContact).toHaveBeenCalledWith(
+        expect.objectContaining({ cadenceDays: "14" }),
+      );
+    });
+  });
+
+  it("defaults to no reminder", () => {
+    render(<ContactForm />);
+    expect(screen.getByLabelText("Follow-up reminder")).toHaveValue("");
   });
 });

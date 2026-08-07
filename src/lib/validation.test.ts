@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { contactInputSchema, contactUpdateSchema } from "@/lib/validation";
+import {
+  contactInputSchema,
+  contactUpdateSchema,
+  interactionInputSchema,
+} from "@/lib/validation";
 
 describe("contactInputSchema", () => {
   it("requires a non-empty name", () => {
@@ -58,5 +62,37 @@ describe("contactUpdateSchema", () => {
   it("allows an empty object (no-op update)", () => {
     const result = contactUpdateSchema.safeParse({});
     expect(result.success).toBe(true);
+  });
+
+  it("omits cadenceDays entirely when not provided, instead of clearing it", () => {
+    const result = contactUpdateSchema.parse({ company: "US Navy" });
+    expect(result).not.toHaveProperty("cadenceDays");
+  });
+
+  it("treats an explicit null cadenceDays as clearing the reminder", () => {
+    const result = contactUpdateSchema.safeParse({ cadenceDays: null });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.cadenceDays).toBeNull();
+    }
+  });
+
+  it("rejects a non-positive cadenceDays", () => {
+    const result = contactUpdateSchema.safeParse({ cadenceDays: 0 });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("interactionInputSchema", () => {
+  it("allows an empty note", () => {
+    const result = interactionInputSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("trims and keeps a provided note", () => {
+    const result = interactionInputSchema.parse({
+      note: "  Caught up over coffee  ",
+    });
+    expect(result.note).toBe("Caught up over coffee");
   });
 });

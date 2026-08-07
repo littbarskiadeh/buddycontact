@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { contactInputSchema, contactUpdateSchema } from "@/lib/validation";
+import {
+  contactInputSchema,
+  contactUpdateSchema,
+  interactionInputSchema,
+} from "@/lib/validation";
 import type { ContactFormValues } from "@/types";
 
 function parseTags(raw: string): string[] {
@@ -12,15 +16,21 @@ function parseTags(raw: string): string[] {
     .filter(Boolean);
 }
 
+function parseCadenceDays(raw: string): number | null {
+  if (!raw) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function toContactInput(values: ContactFormValues) {
   return {
     name: values.name,
     email: values.email,
     phone: values.phone,
     company: values.company,
-    notes: values.notes,
     favorite: values.favorite,
     tags: parseTags(values.tags),
+    cadenceDays: parseCadenceDays(values.cadenceDays),
   };
 }
 
@@ -102,6 +112,7 @@ export async function updateContact(
   });
 
   revalidatePath("/");
+  revalidatePath(`/contacts/${id}`);
   return { success: true };
 }
 
@@ -117,5 +128,40 @@ export async function toggleFavorite(
 ): Promise<ActionResult> {
   await prisma.contact.update({ where: { id }, data: { favorite } });
   revalidatePath("/");
+  revalidatePath(`/contacts/${id}`);
+  return { success: true };
+}
+
+export async function logInteraction(
+  contactId: string,
+  note?: string,
+): Promise<ActionResult> {
+  const parsed = interactionInputSchema.safeParse({ note });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Please fix the highlighted fields.",
+      fieldErrors: parsed.error.flatten().fieldErrors as Record<
+        string,
+        string[]
+      >,
+    };
+  }
+
+  const occurredAt = new Date();
+
+  await prisma.$transaction([
+    prisma.interaction.create({
+      data: { contactId, note: parsed.data.note, occurredAt },
+    }),
+    prisma.contact.update({
+      where: { id: contactId },
+      data: { lastContactedAt: occurredAt },
+    }),
+  ]);
+
+  revalidatePath("/");
+  revalidatePath(`/contacts/${contactId}`);
   return { success: true };
 }
