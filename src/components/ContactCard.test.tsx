@@ -48,15 +48,53 @@ describe("ContactCard", () => {
     expect(screen.getByText("mentor")).toBeInTheDocument();
   });
 
-  it("calls logInteraction when Log Contact is clicked", async () => {
+  it("opens an interactive form instead of logging immediately when Log Contact is clicked", async () => {
     const user = userEvent.setup();
     render(<ContactCard contact={baseContact} />);
 
     await user.click(screen.getByRole("button", { name: "Log Contact" }));
 
+    expect(logInteraction).not.toHaveBeenCalled();
+    expect(
+      screen.getByLabelText("What did you talk about? (optional)"),
+    ).toBeInTheDocument();
+  });
+
+  it("logs the interaction with the entered note and channel on submit", async () => {
+    const user = userEvent.setup();
+    render(<ContactCard contact={baseContact} />);
+
+    await user.click(screen.getByRole("button", { name: "Log Contact" }));
+    await user.type(
+      screen.getByLabelText("What did you talk about? (optional)"),
+      "Caught up over coffee",
+    );
+    await user.selectOptions(
+      screen.getByLabelText("How did you connect? (optional)"),
+      "call",
+    );
+    await user.click(screen.getByRole("button", { name: "Log Contact" }));
+
     await waitFor(() => {
-      expect(logInteraction).toHaveBeenCalledWith("1");
+      expect(logInteraction).toHaveBeenCalledWith(
+        "1",
+        "Caught up over coffee",
+        "call",
+      );
     });
+  });
+
+  it("closes the form without logging when Cancel is clicked", async () => {
+    const user = userEvent.setup();
+    render(<ContactCard contact={baseContact} />);
+
+    await user.click(screen.getByRole("button", { name: "Log Contact" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(logInteraction).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Log Contact" }),
+    ).toBeInTheDocument();
   });
 
   it("calls toggleFavorite with the flipped value when clicked", async () => {

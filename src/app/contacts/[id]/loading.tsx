@@ -12,8 +12,8 @@ export default function Loading() {
         </div>
       </div>
 
-      <div className="mb-8 h-32 animate-pulse rounded-2xl border border-stone-200 bg-surface dark:border-stone-800" />
-      <div className="h-24 animate-pulse rounded-2xl border border-stone-200 bg-surface dark:border-stone-800" />
+      <div className="mb-8 h-32 animate-pulse rounded-3xl border border-stone-200 bg-surface dark:border-stone-800" />
+      <div className="h-24 animate-pulse rounded-3xl border border-stone-200 bg-surface dark:border-stone-800" />
 
       <span className="sr-only" role="status">
         Loading contact…

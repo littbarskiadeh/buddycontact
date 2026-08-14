@@ -28,7 +28,7 @@ function toFormValues(contact: Contact): ContactFormValues {
 }
 
 const inputClassName =
-  "w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700";
+  "w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700";
 
 type ContactFormProps = {
   contact?: Contact;
@@ -174,7 +174,7 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
           type="checkbox"
           checked={values.favorite}
           onChange={(e) => update("favorite", e.target.checked)}
-          className="h-4 w-4 rounded border-stone-300 text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+          className="h-4 w-4 rounded border-stone-300 text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
         />
         Mark as favorite
       </label>
@@ -183,7 +183,7 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
+          className="rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
         >
           {isPending ? "Saving…" : contact ? "Save Changes" : "Add Contact"}
         </button>
@@ -191,7 +191,7 @@ export function ContactForm({ contact, onDone }: ContactFormProps) {
           <button
             type="button"
             onClick={onDone}
-            className="rounded text-sm text-stone-500 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-stone-400"
+            className="rounded text-sm text-stone-500 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-stone-400"
           >
             Cancel
           </button>

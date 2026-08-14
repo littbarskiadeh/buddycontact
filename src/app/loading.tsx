@@ -1,6 +1,6 @@
 function SkeletonCard() {
   return (
-    <div className="flex animate-pulse items-start gap-4 rounded-2xl border border-stone-200 bg-surface p-5 dark:border-stone-800">
+    <div className="flex animate-pulse items-start gap-4 rounded-3xl border border-stone-200 bg-surface p-5 dark:border-stone-800">
       <div className="h-12 w-12 shrink-0 rounded-full bg-stone-200 dark:bg-stone-800" />
       <div className="flex-1 space-y-2 py-1">
         <div className="h-4 w-1/3 rounded bg-stone-200 dark:bg-stone-800" />

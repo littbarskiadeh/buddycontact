@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
+import { NavBar } from "@/components/NavBar";
 import "./globals.css";
 
 const display = Fraunces({
@@ -51,7 +52,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${display.variable} ${body.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <NavBar />
+        {children}
+      </body>
     </html>
   );
 }

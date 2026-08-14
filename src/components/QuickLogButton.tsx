@@ -20,7 +20,7 @@ export function QuickLogButton({ contacts }: QuickLogButtonProps) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:border-stone-700 dark:hover:bg-stone-800 dark:focus-visible:ring-offset-stone-950"
+        className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-stone-700 dark:hover:bg-stone-800 dark:focus-visible:ring-offset-stone-950"
       >
         <Zap className="h-4 w-4" aria-hidden="true" />
         Quick Log
@@ -105,7 +105,7 @@ function QuickLogModal({
         role="dialog"
         aria-modal="true"
         aria-label="Quick log a contact"
-        className="animate-fade-in-up w-full max-w-md rounded-2xl border border-stone-200 bg-surface p-5 shadow-lg dark:border-stone-800"
+        className="animate-fade-in-up w-full max-w-md rounded-3xl border border-stone-200 bg-surface p-5 shadow-lg dark:border-stone-800"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-lg font-semibold text-foreground">
@@ -114,7 +114,7 @@ function QuickLogModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded text-sm text-stone-500 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-stone-400"
+            className="rounded text-sm text-stone-500 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-stone-400"
           >
             Close
           </button>
@@ -124,7 +124,7 @@ function QuickLogModal({
           <p
             role="status"
             aria-live="polite"
-            className="mb-3 rounded-xl bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:bg-orange-950/40 dark:text-orange-300"
+            className="mb-3 rounded-xl bg-teal-50 px-3 py-2 text-sm text-teal-800 dark:bg-teal-950/40 dark:text-teal-300"
           >
             Logged contact with {justLogged}.
           </p>
@@ -142,7 +142,7 @@ function QuickLogModal({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Type a name…"
-              className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700"
+              className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
             />
             {matches.length > 0 && (
               <ul className="mt-2 space-y-1">
@@ -151,7 +151,7 @@ function QuickLogModal({
                     <button
                       type="button"
                       onClick={() => setSelected({ id: c.id, name: c.name })}
-                      className="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:hover:bg-stone-800"
+                      className="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:hover:bg-stone-800"
                     >
                       <span className="font-medium text-foreground">
                         {c.name}
@@ -184,7 +184,7 @@ function QuickLogModal({
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                className="text-orange-700 hover:underline dark:text-orange-400"
+                className="text-teal-700 hover:underline dark:text-teal-400"
               >
                 Change
               </button>
@@ -203,7 +203,7 @@ function QuickLogModal({
                 onChange={(e) =>
                   setChannel(e.target.value as InteractionChannel | "")
                 }
-                className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700"
+                className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
               >
                 <option value="">Not specified</option>
                 {INTERACTION_CHANNELS.map((c) => (
@@ -227,7 +227,7 @@ function QuickLogModal({
                     type="button"
                     onClick={dictation.toggle}
                     aria-pressed={dictation.isListening}
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
                       dictation.isListening
                         ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
                         : "text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800"
@@ -255,14 +255,14 @@ function QuickLogModal({
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={2}
-                className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700"
+                className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
               />
             </div>
 
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
+              className="rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
             >
               {isPending ? "Logging…" : "Log Contact"}
             </button>

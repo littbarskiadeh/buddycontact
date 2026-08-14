@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { ArrowRight, PartyPopper, PhoneCall } from "lucide-react";
-import { logInteraction, snoozeContact } from "@/app/actions";
+import { ArrowRight, PartyPopper } from "lucide-react";
+import { snoozeContact } from "@/app/actions";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
+import { LogInteractionForm } from "@/components/LogInteractionForm";
 import { SnoozeSelect } from "@/components/SnoozeSelect";
 import { formatRelativeTime, type FollowUpStatus } from "@/lib/followup";
 
@@ -41,7 +42,7 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
     return (
       <div className="flex flex-col items-center py-16 text-center">
         <PartyPopper
-          className="mb-3 h-10 w-10 text-orange-500"
+          className="mb-3 h-10 w-10 text-teal-500"
           aria-hidden="true"
         />
         <h1 className="font-display text-xl font-semibold text-foreground">
@@ -52,7 +53,7 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
         </p>
         <Link
           href="/"
-          className="mt-6 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700"
+          className="mt-6 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700"
         >
           Back to contacts
         </Link>
@@ -64,7 +65,7 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
     return (
       <div className="flex flex-col items-center py-16 text-center">
         <PartyPopper
-          className="mb-3 h-10 w-10 text-orange-500"
+          className="mb-3 h-10 w-10 text-teal-500"
           aria-hidden="true"
         />
         <h1 className="font-display text-xl font-semibold text-foreground">
@@ -75,7 +76,7 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
         </p>
         <Link
           href="/"
-          className="mt-6 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700"
+          className="mt-6 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700"
         >
           Back to contacts
         </Link>
@@ -92,12 +93,15 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
       </p>
       <div className="mb-6 h-1.5 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-800">
         <div
-          className="h-full rounded-full bg-orange-500 transition-all"
+          className="h-full rounded-full bg-teal-500 transition-all"
           style={{ width: `${(index / total) * 100}%` }}
         />
       </div>
 
-      <div className="animate-fade-in-up flex flex-col items-center rounded-2xl border border-stone-200 bg-surface p-8 text-center shadow-sm dark:border-stone-800">
+      <div
+        key={current.id}
+        className="animate-fade-in-up flex flex-col items-center rounded-3xl border border-stone-200 bg-surface p-6 text-center shadow-sm sm:p-8 dark:border-stone-800"
+      >
         <div
           className={`mb-4 flex h-16 w-16 items-center justify-center rounded-full text-xl font-semibold ring-2 ring-offset-2 dark:ring-offset-stone-950 ${style.badge} ${style.ring}`}
         >
@@ -120,21 +124,15 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
             : "Never contacted"}
         </p>
 
-        <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() =>
-              startTransition(async () => {
-                await logInteraction(current.id);
-                advance();
-              })
-            }
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 disabled:opacity-50"
-          >
-            <PhoneCall className="h-4 w-4" aria-hidden="true" />
-            Log Contact
-          </button>
+        <div className="mt-6 w-full rounded-2xl border border-stone-200 bg-background p-4 text-left dark:border-stone-800">
+          <LogInteractionForm
+            contactId={current.id}
+            submitLabel="Log & Next"
+            onLogged={advance}
+          />
+        </div>
+
+        <div className="mt-3 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
           <SnoozeSelect
             disabled={isPending}
             className="justify-center"

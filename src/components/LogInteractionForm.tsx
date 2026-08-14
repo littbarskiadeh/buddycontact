@@ -7,7 +7,23 @@ import { CHANNEL_LABELS, INTERACTION_CHANNELS } from "@/lib/channels";
 import type { InteractionChannel } from "@/lib/channels";
 import { useSpeechDictation } from "@/lib/useSpeechDictation";
 
-export function LogInteractionForm({ contactId }: { contactId: string }) {
+type LogInteractionFormProps = {
+  contactId: string;
+  /** Called after a successful log, in addition to the built-in field reset. */
+  onLogged?: () => void;
+  /** Renders a Cancel button that calls this instead of submitting. */
+  onCancel?: () => void;
+  submitLabel?: string;
+  autoFocus?: boolean;
+};
+
+export function LogInteractionForm({
+  contactId,
+  onLogged,
+  onCancel,
+  submitLabel = "Log Contact",
+  autoFocus = false,
+}: LogInteractionFormProps) {
   const [note, setNote] = useState("");
   const [channel, setChannel] = useState<InteractionChannel | "">("");
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +51,7 @@ export function LogInteractionForm({ contactId }: { contactId: string }) {
       }
       setNote("");
       setChannel("");
+      onLogged?.();
     });
   }
 
@@ -63,7 +80,7 @@ export function LogInteractionForm({ contactId }: { contactId: string }) {
           onChange={(e) =>
             setChannel(e.target.value as InteractionChannel | "")
           }
-          className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700"
+          className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
         >
           <option value="">Not specified</option>
           {INTERACTION_CHANNELS.map((c) => (
@@ -87,7 +104,7 @@ export function LogInteractionForm({ contactId }: { contactId: string }) {
               type="button"
               onClick={dictation.toggle}
               aria-pressed={dictation.isListening}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
                 dictation.isListening
                   ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
                   : "text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800"
@@ -112,18 +129,30 @@ export function LogInteractionForm({ contactId }: { contactId: string }) {
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
+          autoFocus={autoFocus}
           placeholder="Caught up about their new job…"
-          className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700"
+          className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
-      >
-        {isPending ? "Logging…" : "Log Contact"}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
+        >
+          {isPending ? "Logging…" : submitLabel}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded text-sm text-stone-500 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-stone-400"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }

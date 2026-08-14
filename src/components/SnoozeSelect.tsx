@@ -29,7 +29,7 @@ export function SnoozeSelect({
           if (days > 0) onSnooze(days);
           e.target.value = "";
         }}
-        className="cursor-pointer rounded-full border border-stone-300 bg-surface py-1.5 pr-3 pl-7 text-sm text-stone-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:opacity-50 dark:border-stone-700 dark:text-stone-400"
+        className="cursor-pointer rounded-full border border-stone-300 bg-surface py-1.5 pr-3 pl-7 text-sm text-stone-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-50 dark:border-stone-700 dark:text-stone-400"
       >
         <option value="" disabled>
           Snooze…

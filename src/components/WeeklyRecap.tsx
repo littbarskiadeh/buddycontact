@@ -16,7 +16,7 @@ export function WeeklyRecap({
   const peopleLabel = contactedThisWeek === 1 ? "person" : "people";
 
   return (
-    <div className="animate-fade-in-up flex flex-wrap items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm dark:border-orange-900 dark:bg-orange-950/40">
+    <div className="animate-fade-in-up flex flex-wrap items-center gap-3 rounded-3xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm dark:border-orange-900 dark:bg-orange-950/40">
       <PartyPopper
         className="h-5 w-5 shrink-0 text-orange-600 dark:text-orange-400"
         aria-hidden="true"

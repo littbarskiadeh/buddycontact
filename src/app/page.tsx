@@ -79,14 +79,14 @@ export default async function Home({ searchParams }: PageProps) {
     <div className="relative">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(234,88,12,0.14),transparent)] dark:bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(234,88,12,0.16),transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(13,148,136,0.16),transparent)] dark:bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(13,148,136,0.18),transparent)]"
       />
 
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-balance font-display text-4xl font-semibold text-foreground">
-              BuddyContact
+              Who do you owe a hello?
             </h1>
             <p className="mt-1 text-stone-600 dark:text-stone-400">
               Never lose touch with the people who matter.
@@ -116,7 +116,7 @@ export default async function Home({ searchParams }: PageProps) {
               </h2>
               <Link
                 href="/triage"
-                className="rounded text-sm font-medium text-orange-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-orange-400"
+                className="rounded text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400"
               >
                 Start triage →
               </Link>

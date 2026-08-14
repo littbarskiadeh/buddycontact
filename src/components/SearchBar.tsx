@@ -8,7 +8,7 @@ import type { Tag } from "@/types";
 const SEARCH_DEBOUNCE_MS = 300;
 
 const controlClassName =
-  "rounded-full border border-stone-300 bg-surface py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-stone-700";
+  "rounded-full border border-stone-300 bg-surface py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700";
 
 export function SearchBar({ tags }: { tags: Tag[] }) {
   const router = useRouter();

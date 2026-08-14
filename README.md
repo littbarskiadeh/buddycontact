@@ -9,9 +9,11 @@ relationships (personal or professional) don't quietly go cold.
 - **Follow-up tracking**: set a reminder cadence per contact (weekly,
   monthly, custom) and see who's overdue or due soon on a dedicated "Due for
   follow-up" view — the app's home screen
-- **Log Contact**: one click logs that you reached out and resets the clock;
-  optionally attach a note and the channel you used (call, text, email,
-  chat/DM, social, in person)
+- **Log Contact**: opens a quick inline form — note, channel (call, text,
+  email, chat/DM, social, in person), and optional voice dictation — right
+  where you clicked, then resets the follow-up clock. Nothing gets logged
+  silently; you're always prompted for context, everywhere Log Contact
+  appears (contact cards, the due list, and triage)
 - **Voice dictation**: dictate the note instead of typing it, via the
   browser's built-in Web Speech API — no server round-trip, free
 - **AI topic suggestions**: on a contact's page, generate 2–3 conversation
@@ -144,6 +146,7 @@ src/
     api/contacts/[id]/interactions/  REST: GET/POST interaction history
     api/tags/                    GET /api/tags
   components/
+    NavBar                        Sticky top navigation (Contacts / Triage)
     ContactForm, ContactCard, ContactList, SearchBar, AddContactPanel,
     FollowUpBadge, LogInteractionForm, InteractionTimeline, TopicSuggestions,
     SnoozeSelect, ContactSnoozeControl, QuickLogButton, TriageFlow, WeeklyRecap

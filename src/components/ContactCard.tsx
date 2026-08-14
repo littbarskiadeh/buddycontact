@@ -3,14 +3,10 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Check, PhoneCall, Pencil, Star, Trash2, X } from "lucide-react";
-import {
-  deleteContact,
-  logInteraction,
-  snoozeContact,
-  toggleFavorite,
-} from "@/app/actions";
+import { deleteContact, snoozeContact, toggleFavorite } from "@/app/actions";
 import { ContactForm } from "@/components/ContactForm";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
+import { LogInteractionForm } from "@/components/LogInteractionForm";
 import { SnoozeSelect } from "@/components/SnoozeSelect";
 import { formatRelativeTime, getFollowUpInfo } from "@/lib/followup";
 import type { Contact } from "@/types";
@@ -25,19 +21,20 @@ function initials(name: string): string {
 }
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950 rounded";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-950 rounded";
 
 const pillButton = `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${focusRing}`;
 
 export function ContactCard({ contact }: { contact: Contact }) {
   const [isEditing, setIsEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isLogging, setIsLogging] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   if (isEditing) {
     return (
-      <li className="rounded-2xl border border-stone-200 bg-surface p-5 shadow-sm dark:border-stone-800">
+      <li className="rounded-3xl border border-stone-200 bg-surface p-5 shadow-sm dark:border-stone-800">
         <ContactForm contact={contact} onDone={() => setIsEditing(false)} />
       </li>
     );
@@ -58,7 +55,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
     : "Never contacted";
 
   return (
-    <li className="group animate-fade-in-up rounded-2xl border border-stone-200 bg-surface p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-stone-800">
+    <li className="group animate-fade-in-up rounded-3xl border border-stone-200 bg-surface p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-stone-800">
       <div className="flex items-start gap-4">
         <div
           className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-semibold ring-2 ring-offset-2 dark:ring-offset-stone-950 ${style.badge} ${style.ring}`}
@@ -76,7 +73,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
             </Link>
             {contact.favorite && (
               <Star
-                className="h-4 w-4 fill-orange-500 text-orange-500"
+                className="h-4 w-4 fill-amber-400 text-amber-400"
                 role="img"
                 aria-label="Favorite"
               />
@@ -123,22 +120,32 @@ export function ContactCard({ contact }: { contact: Contact }) {
             </ul>
           )}
 
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() =>
-                startTransition(async () => {
-                  await logInteraction(contact.id);
+          {isLogging && (
+            <div className="animate-fade-in-up mt-4 rounded-2xl border border-stone-200 bg-background p-4 dark:border-stone-800">
+              <LogInteractionForm
+                contactId={contact.id}
+                autoFocus
+                onLogged={() => {
+                  setIsLogging(false);
                   setJustLogged(true);
                   setTimeout(() => setJustLogged(false), 350);
-                })
-              }
-              className={`${pillButton} bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 ${justLogged ? "animate-pulse-once" : ""}`}
-            >
-              <PhoneCall className="h-3.5 w-3.5" aria-hidden="true" />
-              Log Contact
-            </button>
+                }}
+                onCancel={() => setIsLogging(false)}
+              />
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+            {!isLogging && (
+              <button
+                type="button"
+                onClick={() => setIsLogging(true)}
+                className={`${pillButton} bg-teal-600 text-white hover:bg-teal-700 ${justLogged ? "animate-pulse-once" : ""}`}
+              >
+                <PhoneCall className="h-3.5 w-3.5" aria-hidden="true" />
+                Log Contact
+              </button>
+            )}
             {contact.cadenceDays && (
               <SnoozeSelect
                 disabled={isPending}

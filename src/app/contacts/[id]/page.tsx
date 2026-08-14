@@ -66,7 +66,7 @@ export default async function ContactDetail({ params }: PageProps) {
     <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <Link
         href="/"
-        className="mb-6 inline-flex items-center gap-1.5 rounded text-sm text-stone-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:text-stone-400"
+        className="mb-6 inline-flex items-center gap-1.5 rounded text-sm text-stone-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-stone-400"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Back to contacts
@@ -86,7 +86,7 @@ export default async function ContactDetail({ params }: PageProps) {
             </h1>
             {contact.favorite && (
               <Star
-                className="h-4 w-4 fill-orange-500 text-orange-500"
+                className="h-4 w-4 fill-amber-400 text-amber-400"
                 role="img"
                 aria-label="Favorite"
               />
@@ -149,7 +149,7 @@ export default async function ContactDetail({ params }: PageProps) {
         <TopicSuggestions contactId={contact.id} contactName={contact.name} />
       </div>
 
-      <section className="mb-8 rounded-2xl border border-stone-200 bg-surface p-5 shadow-sm dark:border-stone-800">
+      <section className="mb-8 rounded-3xl border border-stone-200 bg-surface p-5 shadow-sm dark:border-stone-800">
         <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-300">
           Log Contact
         </h2>
