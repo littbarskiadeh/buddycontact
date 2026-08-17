@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { ContactCard } from "@/components/ContactCard";
+import { ToastProvider } from "@/components/Toast";
 import type { Contact } from "@/types";
 
 vi.mock("@/app/actions", () => ({
@@ -36,13 +37,21 @@ const baseContact: Contact = {
   updatedAt: new Date().toISOString(),
 };
 
+function renderCard(contact: Contact = baseContact) {
+  return render(
+    <ToastProvider>
+      <ContactCard contact={contact} />
+    </ToastProvider>,
+  );
+}
+
 describe("ContactCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("renders contact details and tags", () => {
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
     expect(screen.getByText("ada@example.com")).toBeInTheDocument();
     expect(screen.getByText("mentor")).toBeInTheDocument();
@@ -50,7 +59,7 @@ describe("ContactCard", () => {
 
   it("opens an interactive form instead of logging immediately when Log Contact is clicked", async () => {
     const user = userEvent.setup();
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
 
     await user.click(screen.getByRole("button", { name: "Log Contact" }));
 
@@ -62,7 +71,7 @@ describe("ContactCard", () => {
 
   it("logs the interaction with the entered note and channel on submit", async () => {
     const user = userEvent.setup();
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
 
     await user.click(screen.getByRole("button", { name: "Log Contact" }));
     await user.type(
@@ -86,7 +95,7 @@ describe("ContactCard", () => {
 
   it("closes the form without logging when Cancel is clicked", async () => {
     const user = userEvent.setup();
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
 
     await user.click(screen.getByRole("button", { name: "Log Contact" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
@@ -99,7 +108,7 @@ describe("ContactCard", () => {
 
   it("calls toggleFavorite with the flipped value when clicked", async () => {
     const user = userEvent.setup();
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
 
     await user.click(screen.getByRole("button", { name: "Favorite" }));
 
@@ -108,14 +117,15 @@ describe("ContactCard", () => {
     });
   });
 
-  it("requires a confirm click before deleting", async () => {
+  it("requires a confirm click before deleting, via the overflow menu", async () => {
     const user = userEvent.setup();
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
     expect(deleteContact).not.toHaveBeenCalled();
 
-    expect(screen.getByText("Delete Ada Lovelace?")).toBeInTheDocument();
+    expect(screen.getByText(/Delete Ada Lovelace\?/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() => {
@@ -125,18 +135,22 @@ describe("ContactCard", () => {
 
   it("does not delete when the delete confirmation is cancelled", async () => {
     const user = userEvent.setup();
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
 
-    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(deleteContact).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+    expect(screen.queryByText(/Delete Ada Lovelace\?/)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "More actions" }),
+    ).toBeInTheDocument();
   });
 
   it("snoozes the contact for the selected number of days", async () => {
     const user = userEvent.setup();
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
 
     await user.selectOptions(screen.getByLabelText("Snooze reminder"), "7");
 
@@ -146,15 +160,16 @@ describe("ContactCard", () => {
   });
 
   it("does not show a snooze control when the contact has no reminder cadence", () => {
-    render(<ContactCard contact={{ ...baseContact, cadenceDays: null }} />);
+    renderCard({ ...baseContact, cadenceDays: null });
     expect(screen.queryByLabelText("Snooze reminder")).not.toBeInTheDocument();
   });
 
-  it("switches to edit mode when Edit is clicked", async () => {
+  it("switches to edit mode when Edit is clicked via the overflow menu", async () => {
     const user = userEvent.setup();
-    render(<ContactCard contact={baseContact} />);
+    renderCard();
 
-    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Edit" }));
 
     expect(
       screen.getByRole("button", { name: "Save Changes" }),

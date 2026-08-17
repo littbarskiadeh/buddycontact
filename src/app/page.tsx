@@ -145,7 +145,10 @@ export default async function Home({ searchParams }: PageProps) {
           </Suspense>
         </div>
 
-        <ContactList contacts={serializedContacts} />
+        <ContactList
+          contacts={serializedContacts}
+          hasFilters={Boolean(q || tag)}
+        />
       </main>
     </div>
   );

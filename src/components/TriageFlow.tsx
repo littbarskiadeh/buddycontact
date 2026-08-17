@@ -7,6 +7,7 @@ import { snoozeContact } from "@/app/actions";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { LogInteractionForm } from "@/components/LogInteractionForm";
 import { SnoozeSelect } from "@/components/SnoozeSelect";
+import { useToast } from "@/components/Toast";
 import { formatRelativeTime, type FollowUpStatus } from "@/lib/followup";
 
 export type TriageContact = {
@@ -30,6 +31,7 @@ function initials(name: string): string {
 export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
   const [index, setIndex] = useState(0);
   const [isPending, startTransition] = useTransition();
+  const { showToast } = useToast();
 
   const total = contacts.length;
   const current = contacts[index];
@@ -128,7 +130,10 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
           <LogInteractionForm
             contactId={current.id}
             submitLabel="Log & Next"
-            onLogged={advance}
+            onLogged={() => {
+              showToast(`Logged contact with ${current.name}.`);
+              advance();
+            }}
           />
         </div>
 
@@ -139,6 +144,9 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
             onSnooze={(days) =>
               startTransition(async () => {
                 await snoozeContact(current.id, days);
+                showToast(
+                  `Snoozed ${current.name} for ${days} ${days === 1 ? "day" : "days"}.`,
+                );
                 advance();
               })
             }

@@ -1,13 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { Check, PhoneCall, Pencil, Star, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  Check,
+  MoreHorizontal,
+  PhoneCall,
+  Pencil,
+  Star,
+  Trash2,
+  X,
+} from "lucide-react";
 import { deleteContact, snoozeContact, toggleFavorite } from "@/app/actions";
 import { ContactForm } from "@/components/ContactForm";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { LogInteractionForm } from "@/components/LogInteractionForm";
 import { SnoozeSelect } from "@/components/SnoozeSelect";
+import { useToast } from "@/components/Toast";
 import { formatRelativeTime, getFollowUpInfo } from "@/lib/followup";
 import type { Contact } from "@/types";
 
@@ -29,8 +38,29 @@ export function ContactCard({ contact }: { contact: Contact }) {
   const [isEditing, setIsEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handlePointerDown(event: MouseEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
 
   if (isEditing) {
     return (
@@ -128,10 +158,41 @@ export function ContactCard({ contact }: { contact: Contact }) {
                 onLogged={() => {
                   setIsLogging(false);
                   setJustLogged(true);
+                  showToast(`Logged contact with ${contact.name}.`);
                   setTimeout(() => setJustLogged(false), 350);
                 }}
                 onCancel={() => setIsLogging(false)}
               />
+            </div>
+          )}
+
+          {confirmingDelete && (
+            <div className="animate-fade-in-up mt-4 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm dark:border-red-900 dark:bg-red-950/40">
+              <span className="flex-1 text-red-800 dark:text-red-300">
+                Delete {contact.name}? This can&apos;t be undone.
+              </span>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() =>
+                  startTransition(async () => {
+                    await deleteContact(contact.id);
+                    showToast(`Deleted ${contact.name}.`);
+                  })
+                }
+                className={`${pillButton} bg-red-600 text-white hover:bg-red-700 disabled:opacity-50`}
+              >
+                <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                className={`${pillButton} text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800`}
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+                Cancel
+              </button>
             </div>
           )}
 
@@ -152,6 +213,9 @@ export function ContactCard({ contact }: { contact: Contact }) {
                 onSnooze={(days) =>
                   startTransition(async () => {
                     await snoozeContact(contact.id, days);
+                    showToast(
+                      `Snoozed ${contact.name} for ${days} ${days === 1 ? "day" : "days"}.`,
+                    );
                   })
                 }
               />
@@ -159,64 +223,64 @@ export function ContactCard({ contact }: { contact: Contact }) {
             <button
               type="button"
               disabled={isPending}
+              aria-label={contact.favorite ? "Unfavorite" : "Favorite"}
+              aria-pressed={contact.favorite}
               onClick={() =>
                 startTransition(async () => {
                   await toggleFavorite(contact.id, !contact.favorite);
                 })
               }
-              className={`${pillButton} text-stone-600 hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-800`}
+              className={`flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-800 ${focusRing}`}
             >
               <Star
-                className={`h-3.5 w-3.5 ${contact.favorite ? "fill-current" : ""}`}
+                className={`h-4 w-4 ${contact.favorite ? "fill-amber-400 text-amber-400" : ""}`}
                 aria-hidden="true"
               />
-              {contact.favorite ? "Unfavorite" : "Favorite"}
             </button>
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className={`${pillButton} text-stone-600 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800`}
-            >
-              <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-              Edit
-            </button>
-            {confirmingDelete ? (
-              <span className="flex items-center gap-2">
-                <span className="text-stone-500 dark:text-stone-400">
-                  Delete {contact.name}?
-                </span>
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() =>
-                    startTransition(async () => {
-                      await deleteContact(contact.id);
-                    })
-                  }
-                  className={`${pillButton} bg-red-600 text-white hover:bg-red-700 disabled:opacity-50`}
-                >
-                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
-                  Confirm
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmingDelete(false)}
-                  className={`${pillButton} text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800`}
-                >
-                  <X className="h-3.5 w-3.5" aria-hidden="true" />
-                  Cancel
-                </button>
-              </span>
-            ) : (
+
+            <div ref={menuRef} className="relative ml-auto">
               <button
                 type="button"
-                onClick={() => setConfirmingDelete(true)}
-                className={`${pillButton} text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                aria-label="More actions"
+                onClick={() => setMenuOpen((open) => !open)}
+                className={`flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800 ${focusRing}`}
               >
-                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                Delete
+                <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
               </button>
-            )}
+              {menuOpen && (
+                <div
+                  role="menu"
+                  className="animate-fade-in-up absolute right-0 z-10 mt-1 w-36 overflow-hidden rounded-xl border border-stone-200 bg-surface py-1 shadow-lg dark:border-stone-800"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setIsEditing(true);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                  >
+                    <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setConfirmingDelete(true);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

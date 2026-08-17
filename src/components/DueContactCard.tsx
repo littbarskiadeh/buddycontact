@@ -7,6 +7,7 @@ import { snoozeContact } from "@/app/actions";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { LogInteractionForm } from "@/components/LogInteractionForm";
 import { SnoozeSelect } from "@/components/SnoozeSelect";
+import { useToast } from "@/components/Toast";
 import { formatRelativeTime, type FollowUpStatus } from "@/lib/followup";
 
 function initials(name: string): string {
@@ -38,6 +39,7 @@ export function DueContactCard({
   const [justLogged, setJustLogged] = useState(false);
   const [isPending, startTransition] = useTransition();
   const style = FOLLOWUP_STYLES[status];
+  const { showToast } = useToast();
 
   return (
     <li
@@ -74,6 +76,9 @@ export function DueContactCard({
                 onSnooze={(days) =>
                   startTransition(async () => {
                     await snoozeContact(id, days);
+                    showToast(
+                      `Snoozed ${name} for ${days} ${days === 1 ? "day" : "days"}.`,
+                    );
                   })
                 }
               />
@@ -99,6 +104,7 @@ export function DueContactCard({
             onLogged={() => {
               setIsLogging(false);
               setJustLogged(true);
+              showToast(`Logged contact with ${name}.`);
               setTimeout(() => setJustLogged(false), 350);
             }}
             onCancel={() => setIsLogging(false)}
