@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { UserRoundX } from "lucide-react";
 
 export default function NotFound() {
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-4 text-center sm:px-6">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400">
-        <UserRoundX className="h-7 w-7" aria-hidden="true" />
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, no optimization needed */}
+      <img
+        src="/not-found.svg"
+        alt=""
+        aria-hidden="true"
+        className="mb-4 h-28 w-28"
+      />
       <h1 className="font-display text-2xl font-semibold text-foreground">
         This contact isn&apos;t here
       </h1>

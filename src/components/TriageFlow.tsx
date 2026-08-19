@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { ArrowRight, PartyPopper } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { snoozeContact } from "@/app/actions";
+import { ConfettiBurst } from "@/components/ConfettiBurst";
 import { FollowUpBadge, FOLLOWUP_STYLES } from "@/components/FollowUpBadge";
 import { LogInteractionForm } from "@/components/LogInteractionForm";
 import { SnoozeSelect } from "@/components/SnoozeSelect";
@@ -43,9 +44,12 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
   if (total === 0) {
     return (
       <div className="flex flex-col items-center py-16 text-center">
-        <PartyPopper
-          className="mb-3 h-10 w-10 text-teal-500"
+        {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, no optimization needed */}
+        <img
+          src="/all-caught-up.svg"
+          alt=""
           aria-hidden="true"
+          className="mb-4 h-28 w-28"
         />
         <h1 className="font-display text-xl font-semibold text-foreground">
           Nothing due right now
@@ -66,10 +70,16 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
   if (!current) {
     return (
       <div className="flex flex-col items-center py-16 text-center">
-        <PartyPopper
-          className="mb-3 h-10 w-10 text-teal-500"
-          aria-hidden="true"
-        />
+        <div className="relative mb-4 h-28 w-28">
+          <ConfettiBurst />
+          {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, no optimization needed */}
+          <img
+            src="/all-caught-up.svg"
+            alt=""
+            aria-hidden="true"
+            className="h-28 w-28"
+          />
+        </div>
         <h1 className="font-display text-xl font-semibold text-foreground">
           All caught up!
         </h1>
