@@ -24,6 +24,12 @@ export type Contact = {
   cadenceDays: number | null;
   lastContactedAt: string | null;
   snoozedUntil: string | null;
+  suggestedTopic: string | null;
+  /** Most recent interaction, for the inbox-style "last message" preview. */
+  lastInteraction: {
+    note: string | null;
+    channel: InteractionChannel | null;
+  } | null;
   tags: Tag[];
   createdAt: string;
   updatedAt: string;

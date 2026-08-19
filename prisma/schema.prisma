@@ -20,6 +20,12 @@ model Contact {
   // When set (and in the future), suppresses "due for follow-up" regardless
   // of cadence — a deliberate "not now" that doesn't punish the streak.
   snoozedUntil    DateTime?
+  // Cached short AI conversation-starter shown as a bubble on the contact
+  // card. Cached (not regenerated per page load) to avoid a Claude call per
+  // contact on every list render; cleared whenever a new interaction is
+  // logged since the context that produced it is now stale.
+  suggestedTopic   String?
+  suggestedTopicAt DateTime?
   tags            Tag[]
   interactions    Interaction[]
   createdAt       DateTime      @default(now())

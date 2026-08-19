@@ -1,8 +1,9 @@
 "use client";
 
 import { useId, useState, useTransition } from "react";
-import { Mic, Square } from "lucide-react";
+import { Mic, SendHorizontal, Square } from "lucide-react";
 import { logInteraction } from "@/app/actions";
+import { CHANNEL_ICONS } from "@/components/channelIcons";
 import { CHANNEL_LABELS, INTERACTION_CHANNELS } from "@/lib/channels";
 import type { InteractionChannel } from "@/lib/channels";
 import { useSpeechDictation } from "@/lib/useSpeechDictation";
@@ -29,7 +30,6 @@ export function LogInteractionForm({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const noteId = useId();
-  const channelId = useId();
 
   const dictation = useSpeechDictation((transcript) => {
     setNote((prev) => (prev ? `${prev} ${transcript}` : transcript));
@@ -56,7 +56,7 @@ export function LogInteractionForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-2.5">
       {error && (
         <p
           role="alert"
@@ -67,92 +67,86 @@ export function LogInteractionForm({
         </p>
       )}
 
-      <div>
-        <label
-          htmlFor={channelId}
-          className="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300"
-        >
-          How did you connect? (optional)
-        </label>
-        <select
-          id={channelId}
-          value={channel}
-          onChange={(e) =>
-            setChannel(e.target.value as InteractionChannel | "")
-          }
-          className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
-        >
-          <option value="">Not specified</option>
-          {INTERACTION_CHANNELS.map((c) => (
-            <option key={c} value={c}>
-              {CHANNEL_LABELS[c]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <div className="mb-1 flex items-center justify-between">
-          <label
-            htmlFor={noteId}
-            className="text-sm font-medium text-stone-700 dark:text-stone-300"
-          >
-            What did you talk about? (optional)
-          </label>
-          {dictation.isSupported && (
+      <div
+        role="group"
+        aria-label="How did you connect?"
+        className="flex flex-wrap gap-1.5"
+      >
+        {INTERACTION_CHANNELS.map((c) => {
+          const Icon = CHANNEL_ICONS[c];
+          const selected = channel === c;
+          return (
             <button
+              key={c}
               type="button"
-              onClick={dictation.toggle}
-              aria-pressed={dictation.isListening}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
-                dictation.isListening
-                  ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
-                  : "text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800"
+              aria-pressed={selected}
+              onClick={() => setChannel(selected ? "" : c)}
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
+                selected
+                  ? "bg-teal-600 text-white"
+                  : "bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700"
               }`}
             >
-              {dictation.isListening ? (
-                <>
-                  <Square className="h-3 w-3 fill-current" aria-hidden="true" />
-                  Stop
-                </>
-              ) : (
-                <>
-                  <Mic className="h-3.5 w-3.5" aria-hidden="true" />
-                  Dictate
-                </>
-              )}
+              <Icon className="h-3 w-3" aria-hidden="true" />
+              {CHANNEL_LABELS[c]}
             </button>
-          )}
-        </div>
+          );
+        })}
+      </div>
+
+      <label htmlFor={noteId} className="sr-only">
+        What did you talk about? (optional)
+      </label>
+      <div className="flex items-end gap-1.5 rounded-2xl border border-stone-300 bg-surface p-1.5 focus-within:ring-2 focus-within:ring-teal-500 dark:border-stone-700">
+        {dictation.isSupported && (
+          <button
+            type="button"
+            onClick={dictation.toggle}
+            aria-pressed={dictation.isListening}
+            aria-label={dictation.isListening ? "Stop dictation" : "Dictate"}
+            title={dictation.isListening ? "Stop dictation" : "Dictate"}
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
+              dictation.isListening
+                ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
+                : "text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800"
+            }`}
+          >
+            {dictation.isListening ? (
+              <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+            ) : (
+              <Mic className="h-4 w-4" aria-hidden="true" />
+            )}
+          </button>
+        )}
         <textarea
           id={noteId}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          rows={2}
+          rows={1}
           autoFocus={autoFocus}
           placeholder="Caught up about their new job…"
-          className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
+          className="max-h-32 min-h-8 flex-1 resize-none bg-transparent px-1 py-1 text-sm text-foreground placeholder:text-stone-400 focus:outline-none"
         />
-      </div>
-
-      <div className="flex items-center gap-3">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
+          aria-label={submitLabel}
+          title={submitLabel}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-600 text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
         >
-          {isPending ? "Logging…" : submitLabel}
+          <SendHorizontal className="h-4 w-4" aria-hidden="true" />
         </button>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded text-sm text-stone-500 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-stone-400"
-          >
-            Cancel
-          </button>
-        )}
       </div>
+
+      {onCancel && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded text-sm text-stone-500 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-stone-400"
+        >
+          Cancel
+        </button>
+      )}
     </form>
   );
 }

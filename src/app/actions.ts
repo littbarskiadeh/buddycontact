@@ -165,9 +165,16 @@ export async function logInteraction(
     }),
     // Reaching out supersedes any earlier "not now" — clear the snooze so
     // the contact doesn't keep showing as snoozed after you've just talked.
+    // Also clear the cached AI conversation-starter: it was grounded in the
+    // history as of before this interaction, so it's stale now.
     prisma.contact.update({
       where: { id: contactId },
-      data: { lastContactedAt: occurredAt, snoozedUntil: null },
+      data: {
+        lastContactedAt: occurredAt,
+        snoozedUntil: null,
+        suggestedTopic: null,
+        suggestedTopicAt: null,
+      },
     }),
   ]);
 

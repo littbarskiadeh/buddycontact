@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, useTransition } from "react";
-import { Mic, Square, Zap } from "lucide-react";
-import { logInteraction } from "@/app/actions";
-import { CHANNEL_LABELS, INTERACTION_CHANNELS } from "@/lib/channels";
-import type { InteractionChannel } from "@/lib/channels";
-import { useSpeechDictation } from "@/lib/useSpeechDictation";
+import { useEffect, useRef, useState } from "react";
+import { Zap } from "lucide-react";
+import { LogInteractionForm } from "@/components/LogInteractionForm";
 import type { Contact } from "@/types";
 
 type QuickLogButtonProps = {
@@ -43,17 +40,8 @@ function QuickLogModal({
   const [selected, setSelected] = useState<{ id: string; name: string } | null>(
     null,
   );
-  const [note, setNote] = useState("");
-  const [channel, setChannel] = useState<InteractionChannel | "">("");
   const [justLogged, setJustLogged] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
   const dialogRef = useRef<HTMLDivElement>(null);
-  const noteId = useId();
-  const channelId = useId();
-
-  const dictation = useSpeechDictation((transcript) => {
-    setNote((prev) => (prev ? `${prev} ${transcript}` : transcript));
-  });
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -69,29 +57,6 @@ function QuickLogModal({
       : contacts
           .filter((c) => c.name.toLowerCase().includes(query.toLowerCase()))
           .slice(0, 6);
-
-  function reset() {
-    setSelected(null);
-    setQuery("");
-    setNote("");
-    setChannel("");
-  }
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!selected) return;
-
-    startTransition(async () => {
-      await logInteraction(
-        selected.id,
-        note || undefined,
-        channel || undefined,
-      );
-      setJustLogged(selected.name);
-      reset();
-      setTimeout(() => setJustLogged(null), 2500);
-    });
-  }
 
   return (
     <div
@@ -174,7 +139,7 @@ function QuickLogModal({
             )}
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="space-y-3">
             <p className="text-sm text-stone-600 dark:text-stone-400">
               Logging contact with{" "}
               <span className="font-semibold text-foreground">
@@ -189,84 +154,17 @@ function QuickLogModal({
                 Change
               </button>
             </p>
-
-            <div>
-              <label
-                htmlFor={channelId}
-                className="mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300"
-              >
-                How did you connect? (optional)
-              </label>
-              <select
-                id={channelId}
-                value={channel}
-                onChange={(e) =>
-                  setChannel(e.target.value as InteractionChannel | "")
-                }
-                className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
-              >
-                <option value="">Not specified</option>
-                {INTERACTION_CHANNELS.map((c) => (
-                  <option key={c} value={c}>
-                    {CHANNEL_LABELS[c]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <div className="mb-1 flex items-center justify-between">
-                <label
-                  htmlFor={noteId}
-                  className="text-sm font-medium text-stone-700 dark:text-stone-300"
-                >
-                  What did you talk about? (optional)
-                </label>
-                {dictation.isSupported && (
-                  <button
-                    type="button"
-                    onClick={dictation.toggle}
-                    aria-pressed={dictation.isListening}
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
-                      dictation.isListening
-                        ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
-                        : "text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800"
-                    }`}
-                  >
-                    {dictation.isListening ? (
-                      <>
-                        <Square
-                          className="h-3 w-3 fill-current"
-                          aria-hidden="true"
-                        />
-                        Stop
-                      </>
-                    ) : (
-                      <>
-                        <Mic className="h-3.5 w-3.5" aria-hidden="true" />
-                        Dictate
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-              <textarea
-                id={noteId}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={2}
-                className="w-full rounded-xl border border-stone-300 bg-surface px-3.5 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-stone-700"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isPending}
-              className="rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-50 dark:focus-visible:ring-offset-stone-950"
-            >
-              {isPending ? "Logging…" : "Log Contact"}
-            </button>
-          </form>
+            <LogInteractionForm
+              contactId={selected.id}
+              autoFocus
+              onLogged={() => {
+                setJustLogged(selected.name);
+                setSelected(null);
+                setQuery("");
+                setTimeout(() => setJustLogged(null), 2500);
+              }}
+            />
+          </div>
         )}
       </div>
     </div>

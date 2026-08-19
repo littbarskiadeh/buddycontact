@@ -15,6 +15,12 @@ vi.mock("@/app/actions", () => ({
   updateContact: vi.fn().mockResolvedValue({ success: true }),
 }));
 
+vi.mock("@/app/ai-actions", () => ({
+  getTopicBubble: vi
+    .fn()
+    .mockResolvedValue({ success: false, error: "No API key configured." }),
+}));
+
 import {
   deleteContact,
   logInteraction,
@@ -32,6 +38,8 @@ const baseContact: Contact = {
   cadenceDays: 14,
   lastContactedAt: new Date().toISOString(),
   snoozedUntil: null,
+  suggestedTopic: null,
+  lastInteraction: null,
   tags: [{ id: "t1", name: "mentor" }],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -50,14 +58,12 @@ describe("ContactCard", () => {
     vi.clearAllMocks();
   });
 
-  it("renders contact details and tags", () => {
+  it("renders the contact's name", () => {
     renderCard();
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
-    expect(screen.getByText("ada@example.com")).toBeInTheDocument();
-    expect(screen.getByText("mentor")).toBeInTheDocument();
   });
 
-  it("opens an interactive form instead of logging immediately when Log Contact is clicked", async () => {
+  it("opens an interactive composer instead of logging immediately when Log Contact is clicked", async () => {
     const user = userEvent.setup();
     renderCard();
 
@@ -78,10 +84,7 @@ describe("ContactCard", () => {
       screen.getByLabelText("What did you talk about? (optional)"),
       "Caught up over coffee",
     );
-    await user.selectOptions(
-      screen.getByLabelText("How did you connect? (optional)"),
-      "call",
-    );
+    await user.click(screen.getByRole("button", { name: "Call" }));
     await user.click(screen.getByRole("button", { name: "Log Contact" }));
 
     await waitFor(() => {
@@ -93,7 +96,7 @@ describe("ContactCard", () => {
     });
   });
 
-  it("closes the form without logging when Cancel is clicked", async () => {
+  it("closes the composer without logging when Cancel is clicked", async () => {
     const user = userEvent.setup();
     renderCard();
 
@@ -106,11 +109,12 @@ describe("ContactCard", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls toggleFavorite with the flipped value when clicked", async () => {
+  it("calls toggleFavorite with the flipped value when clicked via the overflow menu", async () => {
     const user = userEvent.setup();
     renderCard();
 
-    await user.click(screen.getByRole("button", { name: "Favorite" }));
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Favorite" }));
 
     await waitFor(() => {
       expect(toggleFavorite).toHaveBeenCalledWith("1", true);
@@ -148,20 +152,26 @@ describe("ContactCard", () => {
     ).toBeInTheDocument();
   });
 
-  it("snoozes the contact for the selected number of days", async () => {
+  it("snoozes the contact for the selected preset via the overflow menu", async () => {
     const user = userEvent.setup();
     renderCard();
 
-    await user.selectOptions(screen.getByLabelText("Snooze reminder"), "7");
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    await user.click(screen.getByRole("menuitem", { name: "Snooze 1 week" }));
 
     await waitFor(() => {
       expect(snoozeContact).toHaveBeenCalledWith("1", 7);
     });
   });
 
-  it("does not show a snooze control when the contact has no reminder cadence", () => {
+  it("does not show snooze options when the contact has no reminder cadence", async () => {
+    const user = userEvent.setup();
     renderCard({ ...baseContact, cadenceDays: null });
-    expect(screen.queryByLabelText("Snooze reminder")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    expect(
+      screen.queryByRole("menuitem", { name: /Snooze/ }),
+    ).not.toBeInTheDocument();
   });
 
   it("switches to edit mode when Edit is clicked via the overflow menu", async () => {

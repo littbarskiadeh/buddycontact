@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { AddContactPanel } from "@/components/AddContactPanel";
 import { ContactList } from "@/components/ContactList";
@@ -13,6 +14,7 @@ import {
   getRecapCutoffDate,
   getWeeklyRecap,
 } from "@/lib/followup";
+import type { InteractionChannel } from "@/lib/channels";
 
 const RECAP_LOOKBACK_DAYS = 210;
 
@@ -39,7 +41,10 @@ export default async function Home({ searchParams }: PageProps) {
           tag ? { tags: { some: { name: tag } } } : {},
         ],
       },
-      include: { tags: true },
+      include: {
+        tags: true,
+        interactions: { orderBy: { occurredAt: "desc" }, take: 1 },
+      },
       orderBy: [{ favorite: "desc" }, { name: "asc" }],
     }),
     prisma.tag.findMany({ orderBy: { name: "asc" } }),
@@ -49,13 +54,24 @@ export default async function Home({ searchParams }: PageProps) {
     }),
   ]);
 
-  const serializedContacts = contacts.map((c) => ({
-    ...c,
-    createdAt: c.createdAt.toISOString(),
-    updatedAt: c.updatedAt.toISOString(),
-    lastContactedAt: c.lastContactedAt ? c.lastContactedAt.toISOString() : null,
-    snoozedUntil: c.snoozedUntil ? c.snoozedUntil.toISOString() : null,
-  }));
+  const serializedContacts = contacts.map((c) => {
+    const [latest] = c.interactions;
+    return {
+      ...c,
+      createdAt: c.createdAt.toISOString(),
+      updatedAt: c.updatedAt.toISOString(),
+      lastContactedAt: c.lastContactedAt
+        ? c.lastContactedAt.toISOString()
+        : null,
+      snoozedUntil: c.snoozedUntil ? c.snoozedUntil.toISOString() : null,
+      lastInteraction: latest
+        ? {
+            note: latest.note,
+            channel: latest.channel as InteractionChannel | null,
+          }
+        : null,
+    };
+  });
 
   const dueContacts = contacts
     .map((contact) => ({
@@ -76,53 +92,51 @@ export default async function Home({ searchParams }: PageProps) {
   const recap = getWeeklyRecap(recentInteractions);
 
   return (
-    <div className="relative">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(13,148,136,0.16),transparent)] dark:bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(13,148,136,0.18),transparent)]"
-      />
-
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-balance font-display text-4xl font-semibold text-foreground">
-              Who do you owe a hello?
-            </h1>
-            <p className="mt-1 text-stone-600 dark:text-stone-400">
-              Never lose touch with the people who matter.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <QuickLogButton contacts={serializedContacts} />
-            <AddContactPanel />
-          </div>
-        </header>
-
-        <div className="mb-10">
-          <WeeklyRecap
-            contactedThisWeek={recap.contactedThisWeek}
-            streakWeeks={recap.streakWeeks}
-          />
+    <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+      <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-foreground">
+            Conversations
+          </h1>
+          <p className="text-sm text-stone-500 dark:text-stone-400">
+            {contacts.length} {contacts.length === 1 ? "person" : "people"}{" "}
+            you&apos;re keeping up with
+          </p>
         </div>
+        <div className="flex items-center gap-2">
+          <QuickLogButton contacts={serializedContacts} />
+          <AddContactPanel />
+        </div>
+      </header>
 
-        {dueContacts.length > 0 && (
-          <section className="mb-10" aria-labelledby="due-heading">
-            <div className="mb-3 flex items-center justify-between">
-              <h2
-                id="due-heading"
-                className="text-sm font-semibold tracking-wide text-stone-700 uppercase dark:text-stone-300"
-              >
-                Due for follow-up ({dueContacts.length})
-              </h2>
-              <Link
-                href="/triage"
-                className="rounded text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400"
-              >
-                Start triage →
-              </Link>
-            </div>
-            <ul className="space-y-2.5">
-              {dueContacts.map(({ contact, followUp }) => (
+      <div className="mb-5">
+        <WeeklyRecap
+          contactedThisWeek={recap.contactedThisWeek}
+          streakWeeks={recap.streakWeeks}
+        />
+      </div>
+
+      {dueContacts.length > 0 && (
+        <section className="mb-6" aria-labelledby="due-heading">
+          <div className="mb-2 flex items-center justify-between">
+            <h2
+              id="due-heading"
+              className="text-sm font-semibold tracking-wide text-stone-700 uppercase dark:text-stone-300"
+            >
+              Needs a reply ({dueContacts.length})
+            </h2>
+            <Link
+              href="/triage"
+              className="inline-flex items-center gap-0.5 rounded text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400"
+            >
+              Start triage
+              <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          </div>
+          <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl border border-stone-200 bg-surface dark:divide-stone-800 dark:border-stone-800">
+            {dueContacts.map(({ contact, followUp }) => {
+              const [latest] = contact.interactions;
+              return (
                 <DueContactCard
                   key={contact.id}
                   id={contact.id}
@@ -133,23 +147,31 @@ export default async function Home({ searchParams }: PageProps) {
                       : null
                   }
                   status={followUp.status}
+                  lastInteraction={
+                    latest
+                      ? {
+                          note: latest.note,
+                          channel: latest.channel as InteractionChannel | null,
+                        }
+                      : null
+                  }
                 />
-              ))}
-            </ul>
-          </section>
-        )}
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
-        <div className="mb-6">
-          <Suspense>
-            <SearchBar tags={tags} />
-          </Suspense>
-        </div>
+      <div className="mb-4">
+        <Suspense>
+          <SearchBar tags={tags} />
+        </Suspense>
+      </div>
 
-        <ContactList
-          contacts={serializedContacts}
-          hasFilters={Boolean(q || tag)}
-        />
-      </main>
-    </div>
+      <ContactList
+        contacts={serializedContacts}
+        hasFilters={Boolean(q || tag)}
+      />
+    </main>
   );
 }

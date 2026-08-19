@@ -2,23 +2,31 @@
 
 Never lose touch. BuddyContact isn't just an address book — it tracks _when_
 you last talked to someone and _when you're overdue_ to reach out, so
-relationships (personal or professional) don't quietly go cold.
+relationships (personal or professional) don't quietly go cold. The UI is
+deliberately built around a messaging/inbox metaphor — a contact list reads
+like a chat inbox, and a contact's page reads like an open thread — because
+staying in touch _is_ a conversation, not a database record.
 
 ## Features
 
 - **Follow-up tracking**: set a reminder cadence per contact (weekly,
-  monthly, custom) and see who's overdue or due soon on a dedicated "Due for
-  follow-up" view — the app's home screen
-- **Log Contact**: opens a quick inline form — note, channel (call, text,
-  email, chat/DM, social, in person), and optional voice dictation — right
-  where you clicked, then resets the follow-up clock. Nothing gets logged
-  silently; you're always prompted for context, everywhere Log Contact
-  appears (contact cards, the due list, and triage)
+  monthly, custom) and see who's overdue or due soon in a "Needs a reply"
+  section on the home inbox
+- **Log Contact**: opens a quick inline composer — channel chips (call,
+  text, email, chat/DM, social, in person), a note, and optional voice
+  dictation — right where you clicked, then resets the follow-up clock.
+  Nothing gets logged silently; you're always prompted for context,
+  everywhere Log Contact appears (contact rows, the due list, and triage)
 - **Voice dictation**: dictate the note instead of typing it, via the
   browser's built-in Web Speech API — no server round-trip, free
-- **AI topic suggestions**: on a contact's page, generate 2–3 conversation
-  topics grounded in their actual interaction history (Claude Opus 5) —
-  user-triggered, not automatic, to keep it cheap and non-intrusive
+- **AI conversation-starter bubble**: every contact row shows a short,
+  cached AI-generated "what to bring up next" line, grounded in their real
+  interaction history (Claude Opus 5). Generated once and cached on the
+  contact — not regenerated on every page load — and invalidated the next
+  time you log an interaction with them, since the context changed
+- **AI topic suggestions**: on a contact's page, generate 2–3 fuller
+  conversation topics on demand — user-triggered, not automatic, to keep it
+  cheap and non-intrusive
 - **Snooze**: defer a reminder ("not now, ask me in a week") instead of
   either acting on it or having it nag forever
 - **Triage mode** (`/triage`): review everyone who's due one at a time —
@@ -141,7 +149,8 @@ src/
     triage/page.tsx              One-contact-at-a-time review of everyone due (force-dynamic)
     contacts/[id]/page.tsx       Contact detail: topic suggestions, Log Contact form, timeline
     actions.ts                   Server actions (create/update/delete/favorite/logInteraction/snooze)
-    ai-actions.ts                 Claude API call for topic suggestions (isolated — the one paid dependency)
+    ai-actions.ts                 Claude API calls (isolated — the one paid dependency): fuller
+                                  topic suggestions, and getTopicBubble's read-through cache
     api/contacts/                REST: GET/POST /api/contacts, GET/PATCH/DELETE /api/contacts/[id]
     api/contacts/[id]/interactions/  REST: GET/POST interaction history
     api/tags/                    GET /api/tags
@@ -149,6 +158,10 @@ src/
     NavBar                        Sticky top navigation (Contacts / Triage)
     ContactForm, ContactCard, ContactList, SearchBar, AddContactPanel,
     FollowUpBadge, LogInteractionForm, InteractionTimeline, TopicSuggestions,
+    TopicBubble                   Cached AI conversation-starter, contact card
+    channelIcons.tsx               Shared channel → lucide icon map
+    ConfettiBurst                  CSS-only celebration animation (triage complete)
+    Toast                          App-wide toast provider/hook for action feedback
     SnoozeSelect, ContactSnoozeControl, QuickLogButton, TriageFlow, WeeklyRecap
   lib/
     prisma.ts                    Prisma client singleton (libSQL adapter)
