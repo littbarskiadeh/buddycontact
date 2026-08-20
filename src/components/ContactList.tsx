@@ -50,7 +50,7 @@ export function ContactList({
   }
 
   return (
-    <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl border border-stone-200 bg-surface dark:divide-stone-800 dark:border-stone-800">
+    <ul className="shadow-elevated divide-y divide-stone-100 overflow-hidden rounded-3xl bg-surface dark:divide-stone-800">
       {contacts.map((contact) => (
         <ContactCard key={contact.id} contact={contact} />
       ))}

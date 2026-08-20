@@ -59,7 +59,7 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
         </p>
         <Link
           href="/"
-          className="mt-6 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700"
+          className="mt-6 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-teal-700 active:scale-95"
         >
           Back to contacts
         </Link>
@@ -88,7 +88,7 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
         </p>
         <Link
           href="/"
-          className="mt-6 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700"
+          className="mt-6 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-teal-700 active:scale-95"
         >
           Back to contacts
         </Link>
@@ -112,10 +112,10 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
 
       <div
         key={current.id}
-        className="animate-fade-in-up flex flex-col items-center rounded-3xl border border-stone-200 bg-surface p-6 text-center shadow-sm sm:p-8 dark:border-stone-800"
+        className="animate-fade-in-up shadow-elevated-lg flex flex-col items-center rounded-3xl bg-surface p-6 text-center sm:p-8"
       >
         <div
-          className={`mb-4 flex h-16 w-16 items-center justify-center rounded-full text-xl font-semibold ring-2 ring-offset-2 dark:ring-offset-stone-950 ${style.badge} ${style.ring}`}
+          className={`shadow-elevated mb-4 flex h-16 w-16 items-center justify-center rounded-full text-xl font-semibold ring-2 ring-offset-2 dark:ring-offset-stone-950 ${style.badge} ${style.ring}`}
         >
           {initials(current.name) || "?"}
         </div>
@@ -168,7 +168,7 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
             type="button"
             disabled={isPending}
             onClick={advance}
-            className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-stone-500 transition-colors hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-800"
+            className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-stone-500 transition-all hover:bg-stone-100 active:scale-95 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-800"
           >
             Skip
             <ArrowRight className="h-4 w-4" aria-hidden="true" />

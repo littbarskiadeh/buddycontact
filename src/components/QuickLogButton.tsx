@@ -17,7 +17,7 @@ export function QuickLogButton({ contacts }: QuickLogButtonProps) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-stone-700 dark:hover:bg-stone-800 dark:focus-visible:ring-offset-stone-950"
+        className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-stone-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-stone-700 dark:hover:bg-stone-800 dark:focus-visible:ring-offset-stone-950"
       >
         <Zap className="h-4 w-4" aria-hidden="true" />
         Quick Log
@@ -60,7 +60,7 @@ function QuickLogModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-24"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-4 pt-24 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -70,7 +70,7 @@ function QuickLogModal({
         role="dialog"
         aria-modal="true"
         aria-label="Quick log a contact"
-        className="animate-fade-in-up w-full max-w-md rounded-3xl border border-stone-200 bg-surface p-5 shadow-lg dark:border-stone-800"
+        className="animate-fade-in-up shadow-elevated-lg w-full max-w-md rounded-3xl bg-surface p-5"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-lg font-semibold text-foreground">

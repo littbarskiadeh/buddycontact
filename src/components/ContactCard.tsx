@@ -35,7 +35,7 @@ function initials(name: string): string {
 }
 
 const iconButton =
-  "flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500";
+  "flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-all hover:bg-stone-100 active:scale-90 disabled:opacity-50 dark:text-stone-400 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500";
 
 export function ContactCard({ contact }: { contact: Contact }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -88,7 +88,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
 
   return (
     <li className="group relative">
-      <div className="flex items-start gap-3 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-900/40">
+      <div className="flex items-start gap-3 p-4 transition-colors hover:bg-stone-50 sm:p-5 dark:hover:bg-stone-900/40">
         <div className="relative shrink-0">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 text-base font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-300">
             {initials(contact.name) || "?"}
@@ -176,7 +176,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
                     showToast(`Deleted ${contact.name}.`);
                   })
                 }
-                className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-transform hover:bg-red-700 active:scale-95 disabled:opacity-50"
               >
                 <Check className="h-3.5 w-3.5" aria-hidden="true" />
                 Confirm
@@ -184,7 +184,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(false)}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800"
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-stone-500 transition-transform hover:bg-stone-100 active:scale-95 dark:text-stone-400 dark:hover:bg-stone-800"
               >
                 <X className="h-3.5 w-3.5" aria-hidden="true" />
                 Cancel
@@ -220,7 +220,7 @@ export function ContactCard({ contact }: { contact: Contact }) {
             {menuOpen && (
               <div
                 role="menu"
-                className="animate-fade-in-up absolute right-0 z-10 mt-1 w-44 overflow-hidden rounded-xl border border-stone-200 bg-surface py-1 shadow-lg dark:border-stone-800"
+                className="animate-fade-in-up shadow-elevated-lg absolute right-0 z-10 mt-1 w-44 overflow-hidden rounded-2xl bg-surface/95 py-1 backdrop-blur-md"
               >
                 {contact.cadenceDays &&
                   SNOOZE_PRESETS.map((preset) => (

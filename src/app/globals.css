@@ -5,6 +5,18 @@
   --foreground: #221d17;
   --surface: #ffffff;
   color-scheme: light;
+
+  /*
+   * Layered "warm lift" shadows (Airbnb DLS technique: several soft,
+   * low-opacity layers instead of one hard drop-shadow) — reads as a
+   * natural lift off the page rather than a flat box with a border.
+   */
+  --shadow-elevated:
+    0 1px 2px rgba(30, 20, 10, 0.04), 0 4px 10px rgba(30, 20, 10, 0.05),
+    0 12px 24px rgba(30, 20, 10, 0.04);
+  --shadow-elevated-lg:
+    0 2px 4px rgba(30, 20, 10, 0.05), 0 8px 20px rgba(30, 20, 10, 0.07),
+    0 24px 48px rgba(30, 20, 10, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -13,6 +25,12 @@
     --foreground: #f3ece2;
     --surface: #23201b;
     color-scheme: dark;
+    --shadow-elevated:
+      0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 10px rgba(0, 0, 0, 0.25),
+      0 12px 24px rgba(0, 0, 0, 0.2);
+    --shadow-elevated-lg:
+      0 2px 4px rgba(0, 0, 0, 0.25), 0 8px 20px rgba(0, 0, 0, 0.3),
+      0 24px 48px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -28,6 +46,14 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+.shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+.shadow-elevated-lg {
+  box-shadow: var(--shadow-elevated-lg);
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -63,18 +63,18 @@ export default async function ContactDetail({ params }: PageProps) {
   const style = FOLLOWUP_STYLES[followUp.status];
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+    <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
       <Link
         href="/"
-        className="mb-4 inline-flex items-center gap-1.5 rounded text-sm text-stone-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-stone-400"
+        className="mb-5 inline-flex items-center gap-1.5 rounded text-sm text-stone-500 transition-transform hover:underline active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-stone-400"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Back
       </Link>
 
-      <header className="animate-fade-in-up mb-6 flex items-start gap-3 border-b border-stone-200 pb-5 dark:border-stone-800">
+      <header className="animate-fade-in-up mb-7 flex items-start gap-4 border-b border-stone-200/70 pb-6 dark:border-stone-800/70">
         <div className="relative shrink-0">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 text-lg font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+          <div className="shadow-elevated flex h-16 w-16 items-center justify-center rounded-full bg-stone-100 text-xl font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-300">
             {initials(contact.name) || "?"}
           </div>
           <span
@@ -85,7 +85,7 @@ export default async function ContactDetail({ params }: PageProps) {
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-balance font-display text-xl font-semibold text-foreground">
+            <h1 className="text-balance font-display text-2xl font-semibold tracking-tight text-foreground">
               {contact.name}
             </h1>
             {contact.favorite && (

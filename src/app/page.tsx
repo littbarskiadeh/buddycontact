@@ -92,13 +92,13 @@ export default async function Home({ searchParams }: PageProps) {
   const recap = getWeeklyRecap(recentInteractions);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-      <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-foreground">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
             Conversations
           </h1>
-          <p className="text-sm text-stone-500 dark:text-stone-400">
+          <p className="mt-0.5 text-stone-500 dark:text-stone-400">
             {contacts.length} {contacts.length === 1 ? "person" : "people"}{" "}
             you&apos;re keeping up with
           </p>
@@ -109,7 +109,7 @@ export default async function Home({ searchParams }: PageProps) {
         </div>
       </header>
 
-      <div className="mb-5">
+      <div className="mb-6">
         <WeeklyRecap
           contactedThisWeek={recap.contactedThisWeek}
           streakWeeks={recap.streakWeeks}
@@ -117,8 +117,8 @@ export default async function Home({ searchParams }: PageProps) {
       </div>
 
       {dueContacts.length > 0 && (
-        <section className="mb-6" aria-labelledby="due-heading">
-          <div className="mb-2 flex items-center justify-between">
+        <section className="mb-7" aria-labelledby="due-heading">
+          <div className="mb-2.5 flex items-center justify-between">
             <h2
               id="due-heading"
               className="text-sm font-semibold tracking-wide text-stone-700 uppercase dark:text-stone-300"
@@ -127,13 +127,13 @@ export default async function Home({ searchParams }: PageProps) {
             </h2>
             <Link
               href="/triage"
-              className="inline-flex items-center gap-0.5 rounded text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400"
+              className="inline-flex items-center gap-0.5 rounded text-sm font-medium text-teal-700 transition-transform hover:underline active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400"
             >
               Start triage
               <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Link>
           </div>
-          <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl border border-stone-200 bg-surface dark:divide-stone-800 dark:border-stone-800">
+          <ul className="shadow-elevated divide-y divide-stone-100 overflow-hidden rounded-3xl bg-surface dark:divide-stone-800">
             {dueContacts.map(({ contact, followUp }) => {
               const [latest] = contact.interactions;
               return (
