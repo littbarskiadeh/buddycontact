@@ -44,7 +44,10 @@ export function InteractionTimeline({
                   <ChannelIcon className="h-3 w-3" aria-hidden="true" />
                 )}
                 {interaction.channel && CHANNEL_LABELS[interaction.channel]}
-                <time dateTime={occurredAt.toISOString()}>
+                <time
+                  dateTime={occurredAt.toISOString()}
+                  suppressHydrationWarning
+                >
                   {interaction.channel ? " · " : ""}
                   {formatRelativeTime(occurredAt)}
                 </time>

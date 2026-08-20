@@ -121,7 +121,10 @@ export default async function ContactDetail({ params }: PageProps) {
             ))}
           </div>
 
-          <p className="mt-2 text-xs text-stone-400 dark:text-stone-500">
+          <p
+            className="mt-2 text-xs text-stone-400 dark:text-stone-500"
+            suppressHydrationWarning
+          >
             {contact.lastContactedAt
               ? `Last contacted ${formatRelativeTime(contact.lastContactedAt)}`
               : "Never contacted"}

@@ -130,7 +130,10 @@ export function TriageFlow({ contacts }: { contacts: TriageContact[] }) {
         <div className="mt-2">
           <FollowUpBadge status={current.status} />
         </div>
-        <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
+        <p
+          className="mt-3 text-sm text-stone-500 dark:text-stone-400"
+          suppressHydrationWarning
+        >
           {current.lastContactedAt
             ? `Last contacted ${formatRelativeTime(new Date(current.lastContactedAt))}`
             : "Never contacted"}

@@ -78,7 +78,7 @@ export function DueContactCard({
                 aria-hidden="true"
               />
             )}
-            <span className="truncate">
+            <span className="truncate" suppressHydrationWarning>
               {lastInteraction?.note ??
                 (lastContactedAt
                   ? `Last contacted ${formatRelativeTime(new Date(lastContactedAt))}`

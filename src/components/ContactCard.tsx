@@ -115,7 +115,10 @@ export function ContactCard({ contact }: { contact: Contact }) {
                 aria-label="Favorite"
               />
             )}
-            <span className="ml-auto shrink-0 pl-2 text-xs text-stone-400 dark:text-stone-500">
+            <span
+              suppressHydrationWarning
+              className="ml-auto shrink-0 pl-2 text-xs text-stone-400 dark:text-stone-500"
+            >
               {contact.lastContactedAt
                 ? formatRelativeTime(new Date(contact.lastContactedAt))
                 : "New"}
